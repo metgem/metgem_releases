@@ -62,23 +62,23 @@ jobs:
               ~/conda_pkgs_dir
           key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('metgem/environment*.yml') }}
       - name: Set up Python
-        uses: conda-incubator/setup-miniconda@v2
+        uses: mamba-org/setup-micromamba@v1
         with:
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          activate-environment: metgem
-          mamba-version: "*"
-          channel-priority: strict
-          channels: conda-forge,metgem,bioconda
-          python-version: ${{ matrix.python-version }}
+          micromamba-version: latest
           environment-file: metgem/environment.yml
-      - run: |
+          cache-environment: true
+          post-cleanup: 'all'
+          create-args: >-
+            ${{ matrix.python-version }}
+      - name: Install Build Dependencies
+        uses: ./.github/actions/install_build_dependencies
+      - name: Debug info
+        run: |
           conda info
           conda list
           conda config --show-sources
           conda config --show
-      - name: Install Build Dependencies
-        uses: ./.github/actions/install_build_dependencies
+          python --version
       - name: Build
         id: build
         uses: ./.github/actions/build
