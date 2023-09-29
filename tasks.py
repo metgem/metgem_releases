@@ -66,9 +66,9 @@ def exe(ctx, clean=False, debug=False, build_py=True):
     switchs = ["--clean"] if clean else []
     if debug:
         switchs.append("--debug all")
-    # result = ctx.run("pyinstaller {0} --noconfirm {1} --distpath {2} --workpath {3}"
-                     # .format(os.path.join(PACKAGING_DIR, 'MetGem.spec'), " ".join(switchs), DIST, BUILD))
-    result = True
+    result = ctx.run("pyinstaller {0} --noconfirm {1} --distpath {2} --workpath {3}"
+                     .format(os.path.join(PACKAGING_DIR, 'MetGem.spec'), " ".join(switchs), DIST, BUILD))
+
     if result:
         if sys.platform.startswith('win'):
             embed_manifest(ctx, debug)
