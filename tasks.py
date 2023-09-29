@@ -121,7 +121,7 @@ def com(ctx):
     import struct
     import winnt
 
-    exe = os.path.join(DIST, folder, NAME + ".exe")
+    exe = os.path.join(DIST, NAME, NAME + ".exe")
     com = exe.replace('.exe', '.com')
     shutil.copy2(exe, com)
 
