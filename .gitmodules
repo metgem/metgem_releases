@@ -1,0 +1,4 @@
+[submodule "metgem"]
+	path = metgem
+	url = https://github.com/metgem/metgem
+	branch = pyside6
