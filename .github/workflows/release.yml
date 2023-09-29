@@ -54,18 +54,11 @@ jobs:
         uses: actions/cache@v3
         env:
           # Increase this value to reset cache if environment.yml has not changed
-          CACHE_NUMBER: 2
+          CACHE_NUMBER: 0
         with:
           path: |
               ~/conda_pkgs_dir
-              ~/conda-env-explicit.txt
-          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment*.yml') }}
-      - name: Check Cache
-        id: check-cache
-        uses: ./.github/actions/get_environment
-        with:
-          cache-hit: ${{ steps.cache.outputs.cache-hit }}
-          python-version: ${{ matrix.python-version }}
+          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('metgem/environment*.yml') }}
       - name: Set up Python
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -75,9 +68,8 @@ jobs:
           mamba-version: "*"
           channel-priority: strict
           channels: conda-forge,metgem,bioconda
-          python-version: ${{ steps.check-cache.outputs.python-version }}
-          environment-file: ${{ steps.check-cache.outputs.environment }}
-          use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
+          python-version: ${{ matrix.python-version }}
+          environment-file: metgem/environment.yml
       - run: |
           conda info
           conda list
@@ -85,8 +77,6 @@ jobs:
           conda config --show
       - name: Install Build Dependencies
         uses: ./.github/actions/install_build_dependencies
-        with:
-          pip-only: ${{ steps.check-cache.outputs.explicit }}
       - name: Build
         id: build
         uses: ./.github/actions/build
