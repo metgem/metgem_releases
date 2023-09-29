@@ -40,9 +40,9 @@ def clean(ctx, dist=False, bytecode=False, extra=''):
         patterns.append(extra)
     for pattern in patterns:
         if sys.platform.startswith('win'):
-            ctx.run("del /s /q {}".format(pattern))
+            ctx.run(f"del /s /q {pattern}")
         else:
-            ctx.run("rm -rf {}".format(pattern))
+            ctx.run(f"rm -rf {pattern}")
 
 
 # noinspection PyShadowingNames
@@ -55,7 +55,7 @@ def build(ctx, clean=False, validate_appstream=True):
 # noinspection PyShadowingNames
 @task
 def buildpy(ctx):
-    ctx.run("cd {0}/metgem && python setup.py build -b {0}/build".format(PACKAGING_DIR))
+    ctx.run(f"cd {PACKAGING_DIR}/metgem && python setup.py build -b {PACKAGING_DIR}/build")
 
 # noinspection PyShadowingNames,PyUnusedLocal
 @task
@@ -66,8 +66,7 @@ def exe(ctx, clean=False, debug=False, build_py=True):
     switchs = ["--clean"] if clean else []
     if debug:
         switchs.append("--debug all")
-    result = ctx.run("pyinstaller {0} --noconfirm {1} --distpath {2} --workpath {3}"
-                     .format(os.path.join(PACKAGING_DIR, 'metgem', 'MetGem.spec'), " ".join(switchs), DIST, BUILD))
+    result = ctx.run(f"pyinstaller {os.path.join(PACKAGING_DIR, 'MetGem.spec')} --noconfirm {' '.join(switchs)} --distpath {DIST} --workpath {BUILD}")
 
     if result:
         if sys.platform.startswith('win'):
@@ -95,8 +94,8 @@ def exe(ctx, clean=False, debug=False, build_py=True):
 # noinspection PyShadowingNames,PyUnusedLocal
 @task
 def add_rpath(ctx):
-    webengine_process = "{0}/{1}.app/Contents/MacOS/QtWebEngineProcess".format(DIST, NAME)
-    ctx.run('install_name_tool -add_rpath @executable_path/. {}'.format(webengine_process))
+    webengine_process = f"{DIST}/{NAME}.app/Contents/MacOS/QtWebEngineProcess"
+    ctx.run(f"install_name_tool -add_rpath @executable_path/. {webengine_process}")
 
 
 # noinspection PyShadowingNames,PyUnusedLocal
@@ -105,7 +104,7 @@ def embed_manifest(ctx, debug):
     # noinspection PyUnresolvedReferences
     from PyInstaller.utils.win32 import winmanifest
     folder = NAME + "_debug" if debug else NAME
-    exe = "{0}\{1}\{2}.exe".format(DIST, folder, NAME)
+    exe = os.path.join(DIST, folder, NAME + ".exe")
 
     # Embed manifest in exe
     manifest = exe + '.manifest'
@@ -122,9 +121,8 @@ def com(ctx):
     import struct
     import winnt
 
-    exe = "{0}\{1}\{2}.exe".format(DIST, NAME, NAME)
+    exe = os.path.join(DIST, folder, NAME + ".exe")
     com = exe.replace('.exe', '.com')
-    exe = "{0}\{1}\{2}.exe".format(DIST, NAME, NAME)
     shutil.copy2(exe, com)
 
     with open(com, 'r+b') as f:
@@ -178,13 +176,13 @@ def installer(ctx, validate_appstream=True):
 
             subprocess.run(['appdmg', appdmg_json_fn, output])
     elif sys.platform.startswith('linux'):
-        if not os.path.exists('{}/appimagetool-x86_64.AppImage'.format(PACKAGING_DIR)):
-            ctx.run('wget {} -P {}'.format(APPIMAGE_TOOL_URL, PACKAGING_DIR))
-            ctx.run('chmod u+x {}/appimagetool-x86_64.AppImage'.format(PACKAGING_DIR))
-        ctx.run('cp -r {0}/{1}/* {2}/AppDir/usr/lib/'.format(DIST, NAME, PACKAGING_DIR))
+        if not os.path.exists(f'{PACKAGING_DIR}/appimagetool-x86_64.AppImage'):
+            ctx.run(f'wget {APPIMAGE_TOOL_URL} -P {PACKAGING_DIR}')
+            ctx.run(f'chmod u+x {PACKAGING_DIR}/appimagetool-x86_64.AppImage')
+        ctx.run(f'cp -r {DIST}/{NAME}/* {PACKAGING_DIR}/AppDir/usr/lib/')
         switch = '-n' if not validate_appstream else ''
-        ctx.run('cd {0} && ARCH=x86_64 ./appimagetool-x86_64.AppImage AppDir {1}'.format(PACKAGING_DIR, switch))
-        ctx.run('rm -r {}/AppDir/usr/lib/*'.format(PACKAGING_DIR))
+        ctx.run(f'cd {PACKAGING_DIR} && ARCH=x86_64 ./appimagetool-x86_64.AppImage AppDir {switch}')
+        ctx.run(f'rm -r {PACKAGING_DIR}/AppDir/usr/lib/*')
         
         
 
