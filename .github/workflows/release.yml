@@ -99,6 +99,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           prerelease: true
+          allowUpdates: true
+          updateOnlyUnreleased: true
           repo: metgem
       - name: Upload Release Asset
         id: upload-release-asset

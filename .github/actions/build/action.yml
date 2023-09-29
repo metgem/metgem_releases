@@ -20,7 +20,7 @@ runs:
       shell: bash -l {0}
       id: build
       run: |
-        python -m invoke packaging.build
+        python -m invoke build
         shopt -s extglob
         asset_name=`find metgem_packaging -maxdepth 1 \( -name "setup_MetGem*" -or -name "MetGem*.dmg" -or -name "MetGem*.AppImage" \) -print0 | xargs -0 ls -t | head -n 1 | xargs -n 1 basename`
         echo "asset-name=$asset_name" >> $GITHUB_OUTPUT
