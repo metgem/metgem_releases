@@ -1,10 +1,5 @@
 name: 'Install Build Dependencies'
 description: 'Update environment with build dependencies'
-inputs:
-  pip-only: 
-    description: "Install only pip dependencies"
-    required: false
-    default: 'false'
 runs:
   using: "composite"
   steps:
@@ -14,17 +9,8 @@ runs:
         mamba env update -n metgem -f metgem/environment.dev.yml
         if [ "${{ runner.os }}" == "Windows" ]; then
             mamba install pywin32
-        fi
-    - name: Install Linux build dependencies
-      shell: bash -l {0}
-      run: |
-        if [ "${{ runner.os }}" == "Linux" ]; then
+        elif [ "${{ runner.os }}" == "Linux" ]; then
           sudo apt-get install -y libfuse2
-        fi
-    - name: Install macOS build dependencies
-      shell: bash -l {0}
-      run: |
-        if [ "${{ runner.os }}" == "macOS" ]; then
+        elif [ "${{ runner.os }}" == "macOS" ]; then
           npm install -g appdmg
         fi
-      

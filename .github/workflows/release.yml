@@ -36,13 +36,24 @@ jobs:
         shell: bash -l {0}
     strategy:
       matrix:
-        python-version: [3.9]
+        python-version: ["3.10"]
         os: ${{ fromJSON(needs.generate-matrix.outputs.os) }}
       fail-fast: false
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+      - name: Set up Python
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          activate-environment: metgem
+          use-mamba: true
+          mamba-version: "*"
+          channel-priority: strict
+          channels: conda-forge,metgem,bioconda
+          python-version: ${{ matrix.python-version }}
       - name: Get Cache folder
         id: get-prefix
         run: |
@@ -63,27 +74,17 @@ jobs:
         with:
           path: ${{ steps.get-prefix.outputs.prefix }}
           key: ${{ matrix.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('metgem/environment*.yml') }}
-      - name: Set up Python
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          activate-environment: metgem
-          mamba-version: "*"
-          channel-priority: strict
-          channels: conda-forge,metgem,bioconda
-          python-version: ${{ matrix.python-version }}
-          environment-file: metgem/environment.yml
+      - name: Update environment
+        run: mamba env update -n my-env -f metgem/environment.yml
+        if: steps.cache.outputs.cache-hit != 'true'
       - name: Install Build Dependencies
         uses: ./.github/actions/install_build_dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
       - run: |
           conda info
           conda list
           conda config --show-sources
           conda config --show
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: ${{ github.event_name == 'workflow_dispatch' }}
       - name: Build
         id: build
         uses: ./.github/actions/build
