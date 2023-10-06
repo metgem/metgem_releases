@@ -27,20 +27,13 @@ env:
   GITHUB_TOKEN: ${{ github.token }}
 
 jobs:
-  print-job:
-    name: Print event
-    runs-on: ubuntu-latest
-    steps:
-    - name: Dump GitHub context
-      env:
-        GITHUB_CONTEXT: ${{ toJson(github) }}
-      run: |
-        echo "$GITHUB_CONTEXT"
-
   build-release:
     name: Build
-    needs: [print-job, generate-matrix]
+    needs: [generate-matrix]
     runs-on: ${{ matrix.os }}-latest
+    defaults:
+      run:
+        shell: bash -l {0}
     strategy:
       matrix:
         python-version: [3.9]
@@ -72,13 +65,13 @@ jobs:
           channels: conda-forge,metgem,bioconda
           python-version: ${{ matrix.python-version }}
           environment-file: metgem/environment.yml
+      - name: Install Build Dependencies
+        uses: ./.github/actions/install_build_dependencies
       - run: |
           conda info
           conda list
           conda config --show-sources
           conda config --show
-      - name: Install Build Dependencies
-        uses: ./.github/actions/install_build_dependencies
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         if: ${{ github.event_name == 'workflow_dispatch' }}
