@@ -4,6 +4,7 @@ runs:
   using: "composite"
   steps:
     - name: Update environment
+      shell: bash -l {0}
       run: |
         mamba env update -n metgem -f metgem/environment.yml
     - name: Install build dependencies
@@ -17,7 +18,9 @@ runs:
         elif [ "${{ runner.os }}" == "macOS" ]; then
           npm install -g appdmg
         fi
-    - run: |
+    - name: Conda info
+      shell: bash -l {0}
+      run: |
         conda info
         conda list
         conda config --show-sources
