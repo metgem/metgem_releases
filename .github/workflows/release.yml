@@ -74,17 +74,9 @@ jobs:
         with:
           path: ${{ steps.get-prefix.outputs.prefix }}
           key: ${{ matrix.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('metgem/environment*.yml') }}
-      - name: Update environment
-        run: mamba env update -n my-env -f metgem/environment.yml
+      - name: Set up Environment
+        uses: ./.github/actions/set_up_env
         if: steps.cache.outputs.cache-hit != 'true'
-      - name: Install Build Dependencies
-        uses: ./.github/actions/install_build_dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-      - run: |
-          conda info
-          conda list
-          conda config --show-sources
-          conda config --show
       - name: Build
         id: build
         uses: ./.github/actions/build

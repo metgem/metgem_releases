@@ -1,8 +1,11 @@
-name: 'Install Build Dependencies'
-description: 'Update environment with build dependencies'
+name: 'Set up Environment'
+description: 'Set up miniconda environment'
 runs:
   using: "composite"
   steps:
+    - name: Update environment
+      run: |
+        mamba env update -n metgem -f metgem/environment.yml
     - name: Install build dependencies
       shell: bash -l {0}
       run: |
@@ -14,3 +17,8 @@ runs:
         elif [ "${{ runner.os }}" == "macOS" ]; then
           npm install -g appdmg
         fi
+    - run: |
+        conda info
+        conda list
+        conda config --show-sources
+        conda config --show
