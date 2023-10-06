@@ -79,6 +79,9 @@ jobs:
           conda config --show
       - name: Install Build Dependencies
         uses: ./.github/actions/install_build_dependencies
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' }}
       - name: Build
         id: build
         uses: ./.github/actions/build
