@@ -69,6 +69,9 @@ jobs:
       - name: Set up Environment
         uses: ./.github/actions/set_up_env
         if: steps.cache.outputs.cache-hit != 'true'
+      - name: Update Environment
+        run: mamba update -n metgem --all
+        if: steps.cache.outputs.cache-hit == 'true'
       - name: Build
         id: build
         uses: ./.github/actions/build
