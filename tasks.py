@@ -95,7 +95,8 @@ def exe(ctx, clean=False, debug=False, build_py=True):
 @task
 def add_rpath(ctx):
     webengine_process = f"{DIST}/{NAME}.app/Contents/MacOS/QtWebEngineProcess"
-    ctx.run(f"install_name_tool -add_rpath @executable_path/. {webengine_process}")
+    if os.path.exists(webengine_process):
+        ctx.run(f"install_name_tool -add_rpath @executable_path/. {webengine_process}")
 
 
 # noinspection PyShadowingNames,PyUnusedLocal
