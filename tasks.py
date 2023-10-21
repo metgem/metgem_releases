@@ -24,7 +24,7 @@ API_MS_WIN_CORE_PATH = f"api-ms-win-core-path-blender/x64/{API_MS_WIN_CORE_PATH_
 
 
 def get_git_revision_short_hash():
-    short_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'])
+    short_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD:metgem'])
     short_hash = str(short_hash, "utf-8").strip()
     return short_hash
 
