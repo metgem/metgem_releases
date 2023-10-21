@@ -38,8 +38,10 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: true
+      - name: Update submodules
+        run: |
+          git submodule init
+          git submodule update
       - name: Set up Python
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -95,6 +97,7 @@ jobs:
           allowUpdates: true
           updateOnlyUnreleased: true
           repo: metgem
+          tag: ${{ steps.build.outputs.tag }}
       - name: Upload Release Asset
         id: upload-release-asset
         uses: actions/upload-release-asset@v1

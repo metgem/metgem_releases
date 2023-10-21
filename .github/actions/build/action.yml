@@ -1,6 +1,12 @@
 name: 'Build'
 description: 'Build MetGem and returns produced asset name and mimetype'
 outputs:
+  version:
+    description: "Version of built program"
+    value: ${{ steps.version.outputs.version }}
+  tag:
+    description: "Tag of built version"
+    value: ${{ steps.version.outputs.tag }}
   asset-name: 
     description: "Name of produced asset"
     value: ${{ steps.build.outputs.asset-name }}
@@ -16,12 +22,19 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Get version
+      shell: bash -l {0}
+      id: version
+      run: |
+        pushd metgem
+        version=`python -c "import versioneer; print(versioneer.get_version())" |  cut -d "+" -f 1`
+        popd
+        echo "version=${version}" >> $GITHUB_OUTPUT
+        echo "tag=v${version}" >> $GITHUB_OUTPUT
     - name: Build
       shell: bash -l {0}
       id: build
       run: |
-        git submodule foreach "git fetch --tags -f"
-        python metgem/setup.py version
         python -m invoke build
         shopt -s extglob
         asset_name=`find . -maxdepth 1 \( -name "setup_MetGem*" -or -name "MetGem*.dmg" -or -name "MetGem*.AppImage" \) -print0 | xargs -0 ls -t | head -n 1 | xargs -n 1 basename`
