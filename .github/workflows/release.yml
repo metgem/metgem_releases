@@ -97,6 +97,7 @@ jobs:
           allowUpdates: true
           updateOnlyUnreleased: true
           repo: metgem
+          owner: metgem
           tag: ${{ steps.build.outputs.tag }}
       - name: Upload Release Asset
         id: upload-release-asset
