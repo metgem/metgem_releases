@@ -30,7 +30,7 @@ runs:
       id: version
       run: |
         pushd metgem
-        version=`git describe --tags" |  cut -d "+" -f 1`
+        version=`git describe --tags |  cut -d "+" -f 1`
         hash=`git rev-parse --short HEAD`
         popd
         echo "version=${version}" >> $GITHUB_OUTPUT
