@@ -1,5 +1,10 @@
 name: 'Build'
 description: 'Build MetGem and returns produced asset name and mimetype'
+inputs:
+  nightly:
+    description: "Whether the build is nightly build"
+    required: false
+    default: 'false'
 outputs:
   version:
     description: "Version of built program"
@@ -46,7 +51,11 @@ runs:
         asset_basename=${asset_name%.*}
         asset_ext=${asset_name#*.}
         asset_mimetype=`file -b --mime-type $asset_name`
-        asset_outputname="$asset_basename-${{ steps.version.outputs.hash }}.$asset_ext"
+        if [ "${{ inputs.nightly }}" == "true" ]; then
+          asset_outputname="$asset_basename-${{ steps.version.outputs.hash }}.$asset_ext"
+        else
+          asset_outputname="$asset_basename-${{ steps.version.outputs.tag }}.$asset_ext"
+        fi
         
         mv $asset_name $asset_outputname
         
