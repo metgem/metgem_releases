@@ -7,6 +7,9 @@ outputs:
   tag:
     description: "Tag of built version"
     value: ${{ steps.version.outputs.tag }}
+  hash:
+    description: "Git hash of built version"
+    value: ${{ steps.version.outputs.hash }}
   asset-name: 
     description: "Name of produced asset"
     value: ${{ steps.build.outputs.asset-name }}
@@ -27,10 +30,12 @@ runs:
       id: version
       run: |
         pushd metgem
-        version=`python -c "import versioneer; print(versioneer.get_version())" |  cut -d "+" -f 1`
+        version=`git describe --tags" |  cut -d "+" -f 1`
+        hash=`git rev-parse --short HEAD`
         popd
         echo "version=${version}" >> $GITHUB_OUTPUT
         echo "tag=v${version}" >> $GITHUB_OUTPUT
+        echo "hash=${hash}" >> $GITHUB_OUTPUT
     - name: Build
       shell: bash -l {0}
       id: build
@@ -38,7 +43,14 @@ runs:
         python -m invoke build
         shopt -s extglob
         asset_name=`find . -maxdepth 1 \( -name "setup_MetGem*" -or -name "MetGem*.dmg" -or -name "MetGem*.AppImage" \) -print0 | xargs -0 ls -t | head -n 1 | xargs -n 1 basename`
-        echo "asset-name=$asset_name" >> $GITHUB_OUTPUT
-        echo "asset-mimetype=`file -b --mime-type $asset_name`" >> $GITHUB_OUTPUT
-        echo "asset-ext=${asset_name#*.}" >> $GITHUB_OUTPUT
-        echo "asset-basename=${asset_name%.*}" >> $GITHUB_OUTPUT
+        asset_basename=${asset_name%.*}
+        asset-ext=${asset_name#*.}
+        asset-mimetype=`file -b --mime-type $asset_name`
+        asset_outputname=$asset-basename-${{ steps.version.outputs.hash }}.$asset-ext
+        
+        mv $asset_name $asset_outputname
+        
+        echo "asset-name=$asset_outputname" >> $GITHUB_OUTPUT
+        echo "asset-mimetype=$asset-mimetype" >> $GITHUB_OUTPUT
+        echo "asset-ext=$asset-ext" >> $GITHUB_OUTPUT
+        echo "asset-basename=$asset_basename" >> $GITHUB_OUTPUT
