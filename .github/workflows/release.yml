@@ -100,7 +100,6 @@ jobs:
           token: ${{ secrets.RELEASE_TOKEN }}
           artifacts: ${{ steps.build.outputs.asset-name }}
           artifactContentType: ${{ steps.build.outputs.asset-mimetype }}
-          replacesArtifacts: false
 
   generate-matrix:
     runs-on: ubuntu-latest
