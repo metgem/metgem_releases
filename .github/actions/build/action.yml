@@ -46,7 +46,7 @@ runs:
         asset_basename=${asset_name%.*}
         asset_ext=${asset_name#*.}
         asset_mimetype=`file -b --mime-type $asset_name`
-        asset_outputname=$asset-basename-${{ steps.version.outputs.hash }}.$asset-ext
+        asset_outputname="$asset_basename-${{ steps.version.outputs.hash }}.$asset_ext"
         
         mv $asset_name $asset_outputname
         
