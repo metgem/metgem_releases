@@ -47,7 +47,7 @@ jobs:
         run: |
           git submodule init
           pushd metgem
-          git checkout master
+          git checkout main
           git pull
           popd
       - name: Set up Python
