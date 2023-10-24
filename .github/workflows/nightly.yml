@@ -46,6 +46,7 @@ jobs:
       - name: Update submodules
         run: |
           git submodule init
+          git submodule update
           pushd metgem
           git checkout main
           git pull
