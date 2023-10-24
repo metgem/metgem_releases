@@ -100,6 +100,7 @@ jobs:
         uses: WebFreak001/deploy-nightly@v2.0.0
         env:
            GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+           GITHUB_REPOSITORY: metgem/metgem
         with:
           upload_url: https://uploads.github.com/repos/metgem/metgem/releases/33563969/assets{?name,label}
           release_id: 33563969
