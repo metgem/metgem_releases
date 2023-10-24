@@ -79,7 +79,7 @@ jobs:
         id: tests
         uses: ./.github/actions/tests
       - name: Upload Tests Artifacts
-        if: ${{ !env.ACT && (success() || (${{ failure() }} && steps.tests.conclusion == 'failure' )) }}
+        if: ${{ !env.ACT && (success() || (failure() && steps.tests.conclusion == 'failure' )) }}
         uses: actions/upload-artifact@v3
         with:
           name: tests
