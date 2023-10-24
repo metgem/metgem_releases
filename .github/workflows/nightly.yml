@@ -28,7 +28,7 @@ defaults:
     shell: bash -l {0}
     
 env:
-  GITHUB_TOKEN: ${{ github.token }}
+  GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
 jobs:
   build-nightly:
