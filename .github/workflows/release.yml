@@ -70,10 +70,8 @@ jobs:
           key: ${{ matrix.os }}-${{matrix.python-version}}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('metgem/environment*.yml') }}
       - name: Set up Environment
         uses: ./.github/actions/set_up_env
-        if: steps.cache.outputs.cache-hit != 'true'
-      - name: Update Environment
-        run: mamba update -n metgem --all
-        if: steps.cache.outputs.cache-hit == 'true'
+        with:
+          update: ${{ steps.cache.outputs.cache-hit }}
       - name: Build
         id: build
         uses: ./.github/actions/build
@@ -81,11 +79,21 @@ jobs:
         id: tests
         uses: ./.github/actions/tests
       - name: Upload Tests Artifacts
-        if: always()
+        if: ${{ !env.ACT && (success() || (${{ failure() }} && steps.tests.conclusion == 'failure' )) }}
         uses: actions/upload-artifact@v3
         with:
           name: tests
           path: ${{ steps.tests.outputs.log }}
+      - name: Deploy Nightly
+        if: ${{ !env.ACT }}
+        uses: WebFreak001/deploy-nightly@v2.0.0
+        with:
+          upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/33563969/assets{?name,label}
+          release_id: 33563969
+          asset_path: ${{ steps.build.outputs.asset-name }}
+          asset_name: ${{ steps.build.outputs.asset-basename }}-$$.${{ steps.build.outputs.asset-ext }}
+          asset_content_type: ${{ steps.build.outputs.asset-mimetype }}
+          max_releases: 6
       - name: Release
         if: ${{ !env.ACT }}
         id: release
