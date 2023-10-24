@@ -101,8 +101,9 @@ jobs:
         env:
            GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
            GITHUB_REPOSITORY: metgem/metgem
+           GITHUB_SHA: ${{ steps.build.output.hash }}
         with:
-          upload_url: https://uploads.github.com/repos/metgem/metgem/releases/33563969/assets{?name,label}
+          upload_url: https://uploads.github.com/repos/${{ env.GITHUB_REPOSITORY }}/releases/33563969/assets{?name,label}
           release_id: 33563969
           asset_path: ${{ steps.build.outputs.asset-name }}
           asset_name: ${{ steps.build.outputs.asset-basename }}-$$.${{ steps.build.outputs.asset-ext }}
@@ -118,8 +119,9 @@ jobs:
       - name: Check existing assets
         id: assets
         run: |
-          hash=${{ github.sha }}
-          hash=${hash::6}
+          pushd metgem
+          hash=`git rev-parse --short HEAD`
+          popd
           names=( $(curl -sL https://api.github.com/repos/metgem/metgem/releases/33563969/assets | jq -r '.[].name') )
           needs_build='true'
           if [ "${{ github.event_name }}" == "repository_dispatch" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
