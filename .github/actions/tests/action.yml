@@ -11,8 +11,9 @@ runs:
       id: tests
       shell: bash -l {0}
       run: |
-        hash=${{ github.sha }}
-        hash=${hash::6}
+        pushd metgem
+        hash=`git rev-parse --short HEAD`
+        popd
         log=tests-${{ runner.os }}-$hash.log
         echo "log=$log" >> $GITHUB_OUTPUT
         dist/MetGem/MetGem --pytest 1>$log 2>&1
