@@ -99,7 +99,7 @@ jobs:
         if: ${{ !env.ACT }}
         uses: n-elie/deploy-nightly@master
         with:
-          upload_url: https://uploads.github.com/repos/${{ env.GITHUB_REPOSITORY }}/releases/33563969/assets{?name,label}
+          upload_url: https://uploads.github.com/repos/metgem/metgem/releases/33563969/assets{?name,label}
           release_id: 33563969
           asset_path: ${{ steps.build.outputs.asset-name }}
           asset_name: ${{ steps.build.outputs.asset-basename }}-$$.${{ steps.build.outputs.asset-ext }}
