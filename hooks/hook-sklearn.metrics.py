@@ -1,2 +1,3 @@
-hiddenimports = ['sklearn.metrics._pairwise_distances_reduction._argkmin',
-                 'sklearn.metrics._pairwise_distances_reduction._datasets_pair']
+from PyInstaller.utils.hooks import collect_submodules
+
+hiddenimports = collect_submodules('sklearn.metrics', filter=lambda x: "tests" not in x.split("."))
