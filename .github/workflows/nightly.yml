@@ -108,6 +108,17 @@ jobs:
           token: ${{ secrets.RELEASE_TOKEN }}
           repo: metgem/metgem
           sha: ${{ steps.build.outputs.hash }}
+      - name: Update Nightly tag
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.RELEASE_TOKEN }}
+          script: |
+            github.rest.git.createRef({
+              owner: 'metgem',
+              repo: 'metgem',
+              ref: 'refs/tags/nightly',
+              sha: ${{ steps.build.outputs.hash }}
+            })
 
   # Check that current commit does not have a nightly build asset uploaded yet
   check-assets:
@@ -173,12 +184,3 @@ jobs:
           else
             echo 'os=["ubuntu","windows","macos"]' >> $GITHUB_OUTPUT
           fi
-
-  update-nightly-tag:
-    needs: build-nightly
-    runs-on: ubuntu-latest
-    steps:
-      - name: Update Nightly tag
-        uses: richardsimko/update-tag@v1
-        with:
-          tag_name: nightly
