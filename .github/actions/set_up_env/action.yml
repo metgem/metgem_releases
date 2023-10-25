@@ -1,27 +1,29 @@
 name: 'Set up Environment'
 description: 'Set up miniconda environment'
 inputs:
-  update:
-    description: "Update cached environment"
+  use-cached:
+    description: "Use cached environment"
     required: false
     default: 'false'
+  install-system-deps:
+    description: "Install system dependencies"
+    required: false
+    default: 'true'
 runs:
   using: "composite"
   steps:
     - name: Set up environment
+      if: ${{ inputs.use-cached }} == "false"
       shell: bash -l {0}
       run: |
-        if [ "${{ inputs.update }}" == "true" ]; then
-          mamba update -n metgem --all
-        else
-          mamba env update -n metgem -f metgem/environment.yml
-          mamba env update -n metgem -f metgem/environment.dev.yml
-          mamba env update -n metgem -f environment.packaging.yml
-          if [ "${{ runner.os }}" == "Windows" ]; then
-              mamba install pywin32
-          fi
+        mamba env update -n metgem -f metgem/environment.yml
+        mamba env update -n metgem -f metgem/environment.dev.yml
+        mamba env update -n metgem -f environment.packaging.yml
+        if [ "${{ runner.os }}" == "Windows" ]; then
+            mamba install pywin32
         fi
     - name: Install system build dependencies
+      if: ${{ inputs.install-system }} == "true"
       shell: bash -l {0}
       run: |
         if [ "${{ runner.os }}" == "Linux" ]; then

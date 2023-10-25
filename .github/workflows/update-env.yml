@@ -1,4 +1,4 @@
-name: Release
+name: Update Environment
 
 on:
   workflow_dispatch:
@@ -61,7 +61,7 @@ jobs:
       - name: Cache conda
         if: ${{ !env.ACT }}
         id: cache
-        uses: actions/cache/restore@v3
+        uses: actions/cache@v3
         env:
           # Increase this value to reset cache if environment.yml has not changed
           CACHE_NUMBER: 0
@@ -72,32 +72,10 @@ jobs:
         uses: ./.github/actions/set_up_env
         with:
           use-cached: ${{ steps.cache.outputs.cache-hit }}
-      - name: Build
-        id: build
-        uses: ./.github/actions/build
-      - name: Run Tests
-        id: tests
-        uses: ./.github/actions/tests
-      - name: Upload Tests Artifacts
-        if: ${{ !env.ACT && (success() || (failure() && steps.tests.conclusion == 'failure' )) }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: tests
-          path: ${{ steps.tests.outputs.log }}
-      - name: Release
-        if: ${{ !env.ACT }}
-        id: release
-        uses: ncipollo/release-action@v1
-        with:
-          prerelease: true
-          allowUpdates: true
-          updateOnlyUnreleased: true
-          repo: metgem
-          owner: metgem
-          tag: ${{ steps.build.outputs.tag }}
-          token: ${{ secrets.RELEASE_TOKEN }}
-          artifacts: ${{ steps.build.outputs.asset-name }}
-          artifactContentType: ${{ steps.build.outputs.asset-mimetype }}
+          install-system-deps: false
+      - name: Update environment
+        if: ${{ inputs.use-cached }} == "true"
+        run: mamba update -n metgem --all
 
   generate-matrix:
     runs-on: ubuntu-latest
