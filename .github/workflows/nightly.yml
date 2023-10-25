@@ -97,11 +97,7 @@ jobs:
           path: ${{ steps.tests.outputs.log }}
       - name: Deploy Nightly
         if: ${{ !env.ACT }}
-        uses: WebFreak001/deploy-nightly@v2.0.0
-        env:
-           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-           GITHUB_REPOSITORY: metgem/metgem
-           GITHUB_SHA: ${{ steps.build.outputs.hash }}
+        uses: n-elie/deploy-nightly@master
         with:
           upload_url: https://uploads.github.com/repos/${{ env.GITHUB_REPOSITORY }}/releases/33563969/assets{?name,label}
           release_id: 33563969
@@ -109,6 +105,9 @@ jobs:
           asset_name: ${{ steps.build.outputs.asset-basename }}-$$.${{ steps.build.outputs.asset-ext }}
           asset_content_type: ${{ steps.build.outputs.asset-mimetype }}
           max_releases: 6
+          token: ${{ secrets.RELEASE_TOKEN }}
+          repo: metgem/metgem
+          sha: ${{ steps.build.outputs.hash }}
 
   # Check that current commit does not have a nightly build asset uploaded yet
   check-assets:
@@ -116,6 +115,13 @@ jobs:
     outputs:
       needs-build: ${{ steps.assets.outputs.needs-build }}
     steps:
+      - name: Update submodules
+        run: |
+          git submodule init
+          git submodule update
+          pushd metgem
+          git pull origin main
+          popd
       - name: Check existing assets
         id: assets
         run: |
