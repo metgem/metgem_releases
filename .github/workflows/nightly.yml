@@ -107,8 +107,9 @@ jobs:
           max_releases: 6
           token: ${{ secrets.RELEASE_TOKEN }}
           repo: metgem/metgem
-          sha: ${{ steps.build.outputs.hash }}
+          sha: ${{ steps.build.outputs.sha }}
       - name: Update Nightly tag
+        if: ${{ !env.ACT }}
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.RELEASE_TOKEN }}
@@ -117,7 +118,7 @@ jobs:
               owner: 'metgem',
               repo: 'metgem',
               ref: 'refs/tags/nightly',
-              sha: ${{ steps.build.outputs.hash }}
+              sha: '${{ steps.build.outputs.sha }}'
             })
 
   # Check that current commit does not have a nightly build asset uploaded yet
@@ -137,9 +138,7 @@ jobs:
       - name: Check existing assets
         id: assets
         run: |
-          pushd metgem
-          hash=`git rev-parse --short HEAD`
-          popd
+          sha=`git rev-parse --short HEAD:metgem`
           names=( $(curl -sL https://api.github.com/repos/metgem/metgem/releases/33563969/assets | jq -r '.[].name') )
           needs_build='true'
           if [ "${{ github.event_name }}" == "repository_dispatch" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
@@ -148,7 +147,7 @@ jobs:
             for name in "${names[@]}"
             do
               basename=${name##*-};
-              if [ "${basename%.*}" == "$hash" ]; then
+              if [ "${basename%.*}" == "$sha" ]; then
                 echo "[WARNING] Commit already built, skipping build"
                 needs_build='false'
                 break

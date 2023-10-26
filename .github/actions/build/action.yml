@@ -12,9 +12,12 @@ outputs:
   tag:
     description: "Tag of built version"
     value: ${{ steps.version.outputs.tag }}
-  hash:
-    description: "Git hash of built version"
-    value: ${{ steps.version.outputs.hash }}
+  sha-short:
+    description: "Git commit short sha of built version"
+    value: ${{ steps.version.outputs.sha-short }}
+  sha:
+    description: "Git commit sha of built version"
+    value: ${{ steps.version.outputs.sha }}
   asset-name: 
     description: "Name of produced asset"
     value: ${{ steps.build.outputs.asset-name }}
@@ -36,11 +39,13 @@ runs:
       run: |
         pushd metgem
         version=`python -c "import versioneer; print(versioneer.get_version())" |  cut -d "+" -f 1`
-        hash=`git rev-parse --short HEAD`
+        sha_short=`git rev-parse --short HEAD`
+        sha=`git rev-parse HEAD`
         popd
         echo "version=${version}" >> $GITHUB_OUTPUT
         echo "tag=v${version}" >> $GITHUB_OUTPUT
-        echo "hash=${hash}" >> $GITHUB_OUTPUT
+        echo "sha-sort=${sha_short}" >> $GITHUB_OUTPUT
+        echo "sha=${sha}" >> $GITHUB_OUTPUT
     - name: Build
       shell: bash -l {0}
       id: build
@@ -52,7 +57,7 @@ runs:
         asset_ext=${asset_name#*.}
         asset_mimetype=`file -b --mime-type $asset_name`
         if [ "${{ inputs.nightly }}" == "true" ]; then
-          asset_outputname="$asset_basename-${{ steps.version.outputs.hash }}.$asset_ext"
+          asset_outputname="$asset_basename-${{ steps.version.outputs.sha-short }}.$asset_ext"
         else
           asset_outputname="$asset_basename-${{ steps.version.outputs.tag }}.$asset_ext"
         fi
