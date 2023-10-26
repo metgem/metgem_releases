@@ -114,12 +114,29 @@ jobs:
         with:
           github-token: ${{ secrets.RELEASE_TOKEN }}
           script: |
-            github.rest.git.createRef({
-              owner: 'metgem',
-              repo: 'metgem',
-              ref: 'refs/tags/nightly',
-              sha: '${{ steps.build.outputs.sha }}'
-            })
+            const owner = 'metgem';
+            const repo = 'metgem';
+            const sha = '${{ steps.build.outputs.sha }}'
+            const ref = 'tags/nightly'
+            
+            try {
+              github.rest.git.updateRef({
+                owner: owner,
+                repo: repo,
+                ref: ref,
+                sha: sha
+              });
+              console.log('Updated existing tag nightly as', sha);
+            }
+            catch {
+              github.rest.git.createRef({
+                owner: owner,
+                repo: repo,
+                ref: 'refs/' + ref,
+                sha: sha
+              });
+              console.log('Created new tag nightly as', sha);
+            }
 
   # Check that current commit does not have a nightly build asset uploaded yet
   check-assets:
