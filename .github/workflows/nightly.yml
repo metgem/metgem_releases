@@ -94,7 +94,7 @@ jobs:
           path: ${{ steps.tests.outputs.log }}
       - name: Deploy Nightly
         if: ${{ !env.ACT }}
-        uses: WebFreak001/deploy-nightly@260b81a418c24589cf254f4004feb2f9f4684426
+        uses: WebFreak001/deploy-nightly@3.0.0
         with:
           upload_url: https://uploads.github.com/repos/metgem/metgem/releases/33563969/assets{?name,label}
           release_id: 33563969
