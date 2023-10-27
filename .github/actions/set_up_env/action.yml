@@ -13,7 +13,7 @@ runs:
   using: "composite"
   steps:
     - name: Set up environment
-      if: ${{ inputs.use-cached == "false" }}
+      if: ${{ inputs.use-cached == 'false' }}
       shell: bash -l {0}
       run: |
         mamba env update -n metgem -f metgem/environment.yml
@@ -23,7 +23,7 @@ runs:
             mamba install pywin32
         fi
     - name: Install system build dependencies
-      if: ${{ inputs.install-system == "true" }}
+      if: ${{ inputs.install-system == 'true' }}
       shell: bash -l {0}
       run: |
         if [ "${{ runner.os }}" == "Linux" ]; then
