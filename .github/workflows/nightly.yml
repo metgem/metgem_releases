@@ -144,18 +144,10 @@ jobs:
     outputs:
       needs-build: ${{ steps.assets.outputs.needs-build }}
     steps:
-      - uses: actions/checkout@v3
-      - name: Update submodules
-        run: |
-          git submodule init
-          git submodule update
-          pushd metgem
-          git pull origin main
-          popd
       - name: Check existing assets
         id: assets
         run: |
-          sha=`git rev-parse --short HEAD:metgem`
+          sha=`git ls-remote https://github.com/metgem/metgem HEAD | head -1 | cut -f 1`
           names=( $(curl -sL https://api.github.com/repos/metgem/metgem/releases/33563969/assets | jq -r '.[].name') )
           needs_build='true'
           if [ "${{ github.event_name }}" == "repository_dispatch" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
