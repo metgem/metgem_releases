@@ -20,6 +20,11 @@ on:
         type: boolean
         required: false
         default: true
+      macos-arm:
+        description: 'Run build on macOS ARM'
+        type: boolean
+        required: false
+        default: true
   repository_dispatch:
     types: nightly-build
     
@@ -32,7 +37,7 @@ jobs:
     name: Build
     needs: [check-assets, generate-matrix]
     if: ${{ github.event_name == 'workflow_dispatch' || needs.check-assets.outputs.needs-build == 'true' }}
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         python-version: ["3.10"]
@@ -73,7 +78,7 @@ jobs:
           CACHE_NUMBER: 0
         with:
           path: ${{ steps.get-prefix.outputs.prefix }}
-          key: ${{ matrix.os }}-${{matrix.python-version}}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('metgem/environment*.yml') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-${{matrix.python-version}}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('metgem/environment*.yml') }}
       - name: Set up Environment
         uses: ./.github/actions/set_up_env
         with:
@@ -175,18 +180,21 @@ jobs:
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             os=()
             if [ "${{ github.event.inputs.linux}}" == "true" ]; then
-              os+=('ubuntu')
+              os+=('ubuntu-latest')
             fi
             if [ "${{ github.event.inputs.windows}}" == "true" ]; then
-              os+=('windows')
+              os+=('windows-latest')
             fi
             if [ "${{ github.event.inputs.macos }}" == "true" ]; then
-              os+=('macos')
+              os+=('macos-latest')
+            fi
+            if [ "${{ github.event.inputs.macos-arm }}" == "true" ]; then
+              os+=('macos-13-arm64')
             fi
             os=$(printf ', "%s"' "${os[@]}")
             os="[${os:2}]"
             echo "[INFO] OS selected: $os"
             echo "os=$os" >> $GITHUB_OUTPUT
           else
-            echo 'os=["ubuntu","windows","macos"]' >> $GITHUB_OUTPUT
+            echo 'os=["ubuntu-latest","windows-latest","macos-latest","macos-13-arm64"]' >> $GITHUB_OUTPUT
           fi
