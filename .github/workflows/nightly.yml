@@ -144,7 +144,7 @@ jobs:
       - name: Check existing assets
         id: assets
         run: |
-          sha=`git ls-remote https://github.com/metgem/metgem HEAD | head -1 | cut -f 1 | cut -c1-7`
+          sha=`git ls-remote https://github.com/metgem/metgem HEAD | head -1 | cut -f 1 | cut -c1-6`
           echo "MetGem SHA is $sha"
           names=( $(curl -sL https://api.github.com/repos/metgem/metgem/releases/33563969/assets | jq -r '.[].name') )
           needs_build='true'
