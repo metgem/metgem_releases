@@ -139,29 +139,48 @@ jobs:
   check-assets:
     runs-on: ubuntu-latest
     outputs:
-      needs-build: ${{ steps.assets.outputs.needs-build }}
+      needs-build: ${{ steps.assets.outputs.result }}
     steps:
-      - name: Check existing assets
-        id: assets
+      - name: Get release SHA
+        id: sha
         run: |
           sha=`git ls-remote https://github.com/metgem/metgem HEAD | head -1 | cut -f 1 | cut -c1-6`
           echo "MetGem SHA is $sha"
-          names=( $(curl -sL https://api.github.com/repos/metgem/metgem/releases/33563969/assets | jq -r '.[].name') )
-          needs_build='true'
-          if [ "${{ github.event_name }}" == "repository_dispatch" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "[WARNING] Nightly workflow triggered manually"
-          else
-            for name in "${names[@]}"
-            do
-              basename=${name##*-};
-              if [ "${basename%.*}" == "$sha" ]; then
-                echo "[WARNING] Commit already built, skipping build"
-                needs_build='false'
-                break
-              fi
-            done
-          fi
-          echo "needs-build=$needs_build" >> $GITHUB_OUTPUT
+          echo "sha=$sha" >> $GITHUB_OUTPUT
+      - name: Check existing assets
+        id: assets
+        uses: actions/github-script@v6
+        with:
+          result-encoding: string
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+              const owner = 'metgem';
+              const repo = 'metgem';
+              const sha = '${{ steps.sha.outputs.sha }}'
+              const release_id = '33563969'
+              
+              if ("${{ github.event_name }}" == "repository_dispatch" || "${{ github.event_name }}" == "workflow_dispatch") {
+                console.log("[WARNING] Nightly workflow triggered manually");
+                return true;
+              }
+              
+              const assets = await github.rest.repos.listReleaseAssets({
+                  owner: owner,
+                  repo: repo,
+                  release_id: release_id
+              });
+            
+              for (const asset of assets['data']) {
+                asset_name = asset['name'];
+                asset_sha = asset_name.substring(asset_name.lastIndexOf('-')+1, asset_name.lastIndexOf('.')) || ""
+                
+                if (asset_sha == sha) {
+                  console.log("[WARNING] Commit already built, skipping build");
+                  return false;
+                }
+              }
+            
+              return true;
 
   generate-matrix:
     runs-on: ubuntu-latest
