@@ -81,7 +81,7 @@ def exe(ctx, clean=False, debug=False, build_py=True):
                     zip_info = zip.getinfo(API_MS_WIN_CORE_PATH)
                     zip_info.filename = os.path.basename(zip_info.filename)
                     zip.extract(zip_info, os.path.join(PACKAGING_DIR, "build"))
-                shutil.copy2(os.path.join(PACKAGING_DIR, "build", API_MS_WIN_CORE_PATH_FILENAME), os.path.join(DIST, NAME, API_MS_WIN_CORE_PATH_FILENAME))
+                shutil.copy2(os.path.join(PACKAGING_DIR, "build", API_MS_WIN_CORE_PATH_FILENAME), os.path.join(DIST, NAME, "_internal", API_MS_WIN_CORE_PATH_FILENAME))
 
             # Write build version in dist folder
             build_version = get_git_revision_short_hash()
