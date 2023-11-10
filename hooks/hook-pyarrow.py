@@ -13,6 +13,6 @@
 
 from PyInstaller.utils.hooks import collect_submodules, collect_data_files, collect_dynamic_libs
 
-hiddenimports = collect_submodules('pyarrow')
+hiddenimports = collect_submodules('pyarrow', filter=lambda x: "tests" not in x)
 datas = collect_data_files('pyarrow')
 binaries = collect_dynamic_libs('pyarrow')
