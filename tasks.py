@@ -17,6 +17,7 @@ PACKAGING_DIR = os.path.dirname(__file__)
 DIST = os.path.join(PACKAGING_DIR, 'dist')
 BUILD = os.path.join(PACKAGING_DIR, 'build')
 NAME = 'MetGem'
+INTERNAL_SUBDIR = '_internal'
 APPIMAGE_TOOL_URL = "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
 API_MS_WIN_CORE_PATH_URL = "https://github.com/nalexandru/api-ms-win-core-path-HACK/releases/download/0.3.1/api-ms-win-core-path-blender-0.3.1.zip"
 API_MS_WIN_CORE_PATH_FILENAME = "api-ms-win-core-path-l1-1-0.dll"
@@ -81,11 +82,11 @@ def exe(ctx, clean=False, debug=False, build_py=True):
                     zip_info = zip.getinfo(API_MS_WIN_CORE_PATH)
                     zip_info.filename = os.path.basename(zip_info.filename)
                     zip.extract(zip_info, os.path.join(PACKAGING_DIR, "build"))
-                shutil.copy2(os.path.join(PACKAGING_DIR, "build", API_MS_WIN_CORE_PATH_FILENAME), os.path.join(DIST, NAME, "_internal", API_MS_WIN_CORE_PATH_FILENAME))
+                shutil.copy2(os.path.join(PACKAGING_DIR, "build", API_MS_WIN_CORE_PATH_FILENAME), os.path.join(DIST, NAME, INTERNAL_SUBDIR, API_MS_WIN_CORE_PATH_FILENAME))
 
             # Write build version in dist folder
             build_version = get_git_revision_short_hash()
-            with open(os.path.join(DIST, NAME, "_build_version.txt"), "w") as f:
+            with open(os.path.join(DIST, NAME, INTERNAL_SUBDIR, "_build_version.txt"), "w") as f:
                 print(build_version, file=f)
         elif sys.platform.startswith('darwin'):
             add_rpath(ctx)
