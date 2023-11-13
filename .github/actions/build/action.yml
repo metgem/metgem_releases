@@ -5,6 +5,10 @@ inputs:
     description: "Whether the build is nightly build"
     required: false
     default: 'false'
+  certificate:
+    description: "Certificate to sign code"
+    required: false
+    default: ''
 outputs:
   version:
     description: "Version of built program"
@@ -50,7 +54,11 @@ runs:
       shell: bash -l {0}
       id: build
       run: |
-        python -m invoke build --certificate=${{ vars.APPLE_CERTIFICATE }}
+        if [ "${{ inputs.certificate }}" != "" ]; then
+          python -m invoke build --certificate=${{ inputs.certificate }}
+        else
+          python -m invoke build
+        fi
         shopt -s extglob
         asset_name=`find . -maxdepth 1 \( -name "setup_MetGem*" -or -name "MetGem*.dmg" -or -name "MetGem*.AppImage" \) -print0 | xargs -0 ls -t | head -n 1 | xargs -n 1 basename`
         asset_basename=${asset_name%.*}

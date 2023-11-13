@@ -75,6 +75,9 @@ jobs:
       - name: Build
         id: build
         uses: ./.github/actions/build
+        with:
+          nightly: false
+          certificate: ${{ vars.APPLE_CERTIFICATE }}
       - name: Run Tests
         id: tests
         uses: ./.github/actions/tests
