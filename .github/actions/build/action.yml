@@ -55,7 +55,7 @@ runs:
       id: build
       run: |
         if [ "${{ inputs.certificate }}" != "" ]; then
-          python -m invoke build --certificate=${{ inputs.certificate }}
+          python -m invoke build --certificate="${{ inputs.certificate }}"
         else
           python -m invoke build
         fi
