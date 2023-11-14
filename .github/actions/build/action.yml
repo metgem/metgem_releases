@@ -64,12 +64,12 @@ runs:
       run: |
         if [ "${{ inputs.certificate }}" != "" ] && [ "${{ inputs.certificate_pwd }}" != "" ]; then
           key_chain_pwd=`openssl rand -base64 12`
-          echo ${{ inputs.certificate }} | base64 -decode -o certificate.p12
-          security create-keychain -p $key_chain_pwd build.keychain
+          echo "${{ inputs.certificate }}" | base64 --decode -o certificate.p12
+          security create-keychain -p "$key_chain_pwd" build.keychain
           security default-keychain -s build.keychain
-          security unlock-keychain -p $key_chain_pwd build.keychain
-          security import certificate.p12 -k build.keychain -P $ {{ inputs.certificate_pwd }} -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $key_chain_pwd build.keychain
+          security unlock-keychain -p "$key_chain_pwd" build.keychain
+          security import certificate.p12 -k build.keychain -P "${{ inputs.certificate_pwd }}" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$key_chain_pwd" build.keychain
         fi
     - name: Build
       shell: bash -l {0}
