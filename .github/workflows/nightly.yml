@@ -84,6 +84,8 @@ jobs:
         with:
           nightly: true
           certificate: ${{ secrets.APPLE_CERTIFICATE }}
+          certificate_pwd: ${{ secrets.APPLE_CERTIFICATE_PWD }}
+          identity_id: ${{ secrets.APPLE_IDENTITY_ID }}
       - name: Run Tests
         id: tests
         uses: ./.github/actions/tests
