@@ -101,5 +101,5 @@ runs:
           security list-keychain -d user -s build.keychain
           
           # Sign dmg
-          codesign --verbose --sign "${{ inputs.identity_id }}" --identifier "MetGem" "${{ steps.build.outputs.asset-name }}" --keychain build.keychain
+          codesign --force --deep --verbose --sign "${{ inputs.identity_id }}" --identifier "MetGem" "${{ steps.build.outputs.asset-name }}" --keychain build.keychain
         fi
