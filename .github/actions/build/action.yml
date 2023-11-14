@@ -62,7 +62,7 @@ runs:
       shell: bash -l {0}
       if: runner.os == 'macOS'
       run: |
-        if [ "${{ inputs.certificate }}" != "" && "${{ inputs.certificate_pwd }}" != ""]; then
+        if [ "${{ inputs.certificate }}" != "" ] && [ "${{ inputs.certificate_pwd }}" != "" ]; then
           key_chain_pwd=`openssl rand -base64 12`
           echo ${{ inputs.certificate }} | base64 -decode -o certificate.p12
           security create-keychain -p $key_chain_pwd build.keychain
@@ -75,7 +75,7 @@ runs:
       shell: bash -l {0}
       id: build
       run: |
-        if [ "${{ inputs.identity_id }}" != "" && "${{ runner.os }}" == "macOS" ]; then
+        if [ "${{ inputs.identity_id }}" != "" ] && [ "${{ runner.os }}" == "macOS" ]; then
           python -m invoke build --certificate="${{ inputs.identity_id }}"
         else
           python -m invoke build
