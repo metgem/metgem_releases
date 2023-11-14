@@ -48,9 +48,9 @@ def clean(ctx, dist=False, bytecode=False, extra=''):
 
 # noinspection PyShadowingNames
 @task
-def build(ctx, clean=False, validate_appstream=True, certificate:str=None):
+def build(ctx, clean=False, validate_appstream=True):
     exe(ctx, clean)
-    installer(ctx, validate_appstream, certificate)
+    installer(ctx, validate_appstream)
 
 
 # noinspection PyShadowingNames
@@ -141,7 +141,7 @@ def com(ctx):
 
 
 @task
-def installer(ctx, validate_appstream=True, certificate:str=None):
+def installer(ctx, validate_appstream=True):
     if sys.platform.startswith('win'):
         iscc = shutil.which("ISCC")
         iss = os.path.join(PACKAGING_DIR, 'setup.iss')
@@ -171,9 +171,6 @@ def installer(ctx, validate_appstream=True, certificate:str=None):
                            'window': {'size': {'width': 800, 'height': 400}},
                            'contents': [{'x': 525, 'y': 125, 'type': 'link', 'path': '/Applications'},
                                         {'x': 125, 'y': 125, 'type': 'file', 'path': source_folder}]}
-            if certificate is not None:
-                appdmg_json['code-sign'] = {'signing-identity': certificate,
-                                            'identifier': NAME}
             appdmg_json_fn = os.path.join(PACKAGING_DIR, 'appdmg.json')
             with open(appdmg_json_fn, 'w') as f:
                 json.dump(appdmg_json, f)

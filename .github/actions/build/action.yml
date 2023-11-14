@@ -58,28 +58,11 @@ runs:
         echo "tag=v${version}" >> $GITHUB_OUTPUT
         echo "sha-sort=${sha_short}" >> $GITHUB_OUTPUT
         echo "sha=${sha}" >> $GITHUB_OUTPUT
-    - name: Codesign
-      shell: bash -l {0}
-      if: runner.os == 'macOS'
-      run: |
-        if [ "${{ inputs.certificate }}" != "" ] && [ "${{ inputs.certificate_pwd }}" != "" ]; then
-          key_chain_pwd=`openssl rand -base64 12`
-          echo "${{ inputs.certificate }}" | base64 --decode -o certificate.p12
-          security create-keychain -p "$key_chain_pwd" build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p "$key_chain_pwd" build.keychain
-          security import certificate.p12 -k build.keychain -P "${{ inputs.certificate_pwd }}" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$key_chain_pwd" build.keychain
-        fi
     - name: Build
       shell: bash -l {0}
       id: build
       run: |
-        if [ "${{ inputs.identity_id }}" != "" ] && [ "${{ runner.os }}" == "macOS" ]; then
-          python -m invoke build --certificate="${{ inputs.identity_id }}"
-        else
-          python -m invoke build
-        fi
+        python -m invoke build
         shopt -s extglob
         asset_name=`find . -maxdepth 1 \( -name "setup_MetGem*" -or -name "MetGem*.dmg" -or -name "MetGem*.AppImage" \) -print0 | xargs -0 ls -t | head -n 1 | xargs -n 1 basename`
         asset_basename=${asset_name%.*}
@@ -97,3 +80,26 @@ runs:
         echo "asset-mimetype=$asset_mimetype" >> $GITHUB_OUTPUT
         echo "asset-ext=$asset_ext" >> $GITHUB_OUTPUT
         echo "asset-basename=$asset_basename" >> $GITHUB_OUTPUT
+    - name: Codesign
+      shell: bash -l {0}
+      if: runner.os == 'macOS'
+      run: |
+        if [ "${{ inputs.certificate }}" != "" ] && [ "${{ inputs.certificate_pwd }}" != "" ] && [ "${{ inputs.identity_id }}" != "" ]; then
+          # Generate temporary key chain password
+          key_chain_pwd=`openssl rand -base64 12`
+          
+          # Import certificate from secrets
+          echo "${{ inputs.certificate }}" | base64 --decode -o certificate.p12
+          
+          # Create temporary keychain
+          security create-keychain -p "$key_chain_pwd" build.keychain
+          security set-keychain-settings -lut 21600 build.keychain
+          security unlock-keychain -p "$key_chain_pwd" build.keychain
+          
+          # Import certificate to keychain
+          security import certificate.p12 -P "${{ inputs.certificate_pwd }}" -A -t cert -f pkcs12 -k build.keychain
+          security list-keychain -d user -s build.keychain
+          
+          # Sign dmg
+          codesign --verbose --sign "${{ inputs.identity_id }}" --identifier "MetGem" "${{ steps.build.outputs.asset-name }}" --keychain build.keychain
+        fi
