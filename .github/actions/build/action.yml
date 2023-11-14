@@ -100,6 +100,9 @@ runs:
           security import certificate.p12 -P "${{ inputs.certificate_pwd }}" -A -t cert -f pkcs12 -k build.keychain
           security list-keychain -d user -s build.keychain
           
+          # To prevent code sign running forever
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$key_chain_pwd" build.keychain
+          
           # Sign dmg
           codesign --force --deep --verbose --sign "${{ inputs.identity_id }}" --identifier "MetGem" "${{ steps.build.outputs.asset-name }}" --keychain build.keychain
         fi
