@@ -30,8 +30,7 @@ defaults:
 jobs:
   build-nightly:
     name: Build
-    needs: [check-assets, generate-matrix]
-    if: ${{ github.event_name == 'workflow_dispatch' || needs.check-assets.outputs.needs-build == 'true' }}
+    needs: generate-matrix
     runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
@@ -139,10 +138,10 @@ jobs:
             }
 
   # Check that current commit does not have a nightly build asset uploaded yet
-  check-assets:
+  generate-matrix:
     runs-on: ubuntu-latest
     outputs:
-      needs-build: ${{ steps.assets.outputs.result }}
+      os: ${{ steps.assets.outputs.result }}
     steps:
       - name: Get release SHA
         id: sha
@@ -154,17 +153,17 @@ jobs:
         id: assets
         uses: actions/github-script@v6
         with:
-          result-encoding: string
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.RELEASE_TOKEN }}
           script: |
               const owner = 'metgem';
               const repo = 'metgem';
-              const sha = '${{ steps.sha.outputs.sha }}'
-              const release_id = '33563969'
+              const sha = '${{ steps.sha.outputs.sha }}';
+              const release_id = '33563969';
+              const all_oses = ["ubuntu","windows","macos"];
               
               if ("${{ github.event_name }}" == "repository_dispatch" || "${{ github.event_name }}" == "workflow_dispatch") {
                 console.log("[WARNING] Nightly workflow triggered manually");
-                return true;
+                return all_oses;
               }
               
               const assets = await github.rest.repos.listReleaseAssets({
@@ -173,42 +172,25 @@ jobs:
                   release_id: release_id
               });
             
+              let oses = new Set(all_oses);
               for (const asset of assets['data']) {
                 asset_name = asset['name'];
                 asset_sha = asset_name.substring(asset_name.lastIndexOf('-')+1, asset_name.lastIndexOf('.')) || ""
                 
                 if (asset_sha == sha) {
-                  console.log("[WARNING] Commit already built, skipping build");
-                  return false;
+                  if (asset_name.endsWith('.AppImage')) {
+                    oses.delete("ubuntu");
+                    console.log("[WARNING] Commit already built on Linux, skipping build");
+                  }
+                  else if (asset_name.endsWith('.dmg')) {
+                    oses.delete("macos")
+                    console.log("[WARNING] Commit already built on macOS, skipping build");
+                  }
+                  else if (asset_name.endsWith('.exe')) {
+                    oses.delete("windows")
+                    console.log("[WARNING] Commit already built on Windows, skipping build");
+                  }
                 }
               }
             
-              return true;
-
-  generate-matrix:
-    runs-on: ubuntu-latest
-    name: "Generate matrix job specs"
-    outputs:
-      os: ${{ steps.generate-matrix.outputs.os }}
-    steps:
-      - name: generate-matrix
-        id: generate-matrix
-        run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            os=()
-            if [ "${{ github.event.inputs.linux}}" == "true" ]; then
-              os+=('ubuntu')
-            fi
-            if [ "${{ github.event.inputs.windows}}" == "true" ]; then
-              os+=('windows')
-            fi
-            if [ "${{ github.event.inputs.macos }}" == "true" ]; then
-              os+=('macos')
-            fi
-            os=$(printf ', "%s"' "${os[@]}")
-            os="[${os:2}]"
-            echo "[INFO] OS selected: $os"
-            echo "os=$os" >> $GITHUB_OUTPUT
-          else
-            echo 'os=["ubuntu","windows","macos"]' >> $GITHUB_OUTPUT
-          fi
+              return Array.from(oses);
