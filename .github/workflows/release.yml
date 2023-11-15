@@ -124,7 +124,7 @@ jobs:
             
             if ("${{ github.event_name }}" == "workflow_dispatch") {
               let oses = {...all_oses};
-              for (let key in inputs) {
+              for (const key in inputs) {
                 if (inputs[key] != "true") {
                   delete oses[key];
                 }
@@ -133,6 +133,5 @@ jobs:
               console.log("[INFO] OS selected:", Object.keys(oses));
               return Object.values(oses);
             }
-            else {
-              return Object.values(all_oses);
-            }
+            
+            return Object.values(all_oses);

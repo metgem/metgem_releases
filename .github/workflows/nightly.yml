@@ -164,35 +164,62 @@ jobs:
               const all_oses = {"linux": "ubuntu-latest",
                                 "windows": "windows-latest",
                                 "macos": "macos-latest"};
+              const exts = {".AppImage": "linux",
+                            ".dmg": "macos",
+                            ".exe": "windows"};
+              const inputs = context.payload.inputs;
               
-              if ("${{ github.event_name }}" == "repository_dispatch" || "${{ github.event_name }}" == "workflow_dispatch") {
-                console.log("[WARNING] Nightly workflow triggered manually");
-                return Object.values(all_oses);
-              }
+              let oses = {...all_oses};
               
               const assets = await github.rest.repos.listReleaseAssets({
                   owner: owner,
                   repo: repo,
                   release_id: release_id
               });
+              
+              if ("${{ github.event_name }}" == "repository_dispatch" || "${{ github.event_name }}" == "workflow_dispatch") {
+                console.log("[WARNING] Nightly workflow triggered manually");
+                
+                for (const key in inputs) {
+                  if (inputs[key] != "true") {
+                    delete oses[key];
+                  }
+                }
+                
+                // Delete existing assets
+                for (const asset of assets['data']) {
+                  asset_name = asset['name'];
+                  asset_sha = asset_name.substring(asset_name.lastIndexOf('-')+1, asset_name.lastIndexOf('.')) || "";
+                  asset_ext = asset_name.substring(asset_name.lastIndexOf('.'));
+                
+                  if (asset_sha == sha) {
+                    os = exts[asset_ext];
+                    if (Object.keys(oses).includes(os)) {
+                      console.log("[INFO] Deleting old asset", asset_name);
+                      await github.rest.repos.deleteReleaseAsset({
+                        owner: owner,
+                        repo: repo,
+                        asset_id: asset['id']
+                      });
+                    }
+                  }
+                }
+                
+                console.log("[INFO] OS selected:", Object.keys(oses));
+                return Object.values(oses);
+              }
             
-              let oses = {...all_oses};
+              // Keep only os where assets are not already built
               for (const asset of assets['data']) {
                 asset_name = asset['name'];
-                asset_sha = asset_name.substring(asset_name.lastIndexOf('-')+1, asset_name.lastIndexOf('.')) || ""
+                asset_sha = asset_name.substring(asset_name.lastIndexOf('-')+1, asset_name.lastIndexOf('.')) || "";
+                asset_ext = asset_name.substring(asset_name.lastIndexOf('.'));
                 
                 if (asset_sha == sha) {
-                  if (asset_name.endsWith('.AppImage')) {
-                    delete oses.linux;
-                    console.log("[WARNING] Commit already built on Linux, skipping build");
-                  }
-                  else if (asset_name.endsWith('.dmg')) {
-                    delete oses.macos;
-                    console.log("[WARNING] Commit already built on macOS, skipping build");
-                  }
-                  else if (asset_name.endsWith('.exe')) {
-                    delete oses.windows;
-                    console.log("[WARNING] Commit already built on Windows, skipping build");
+                  os = exts[asset_ext];
+                  if (os) {
+                    console.log("[WARNING] Commit already built on", os, ", skipping build");
+                    delete oses[os];
                   }
                 }
               }
