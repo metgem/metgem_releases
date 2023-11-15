@@ -30,7 +30,8 @@ jobs:
   build-release:
     name: Build
     needs: [generate-matrix]
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.os }}
+    if: ${{ needs.generate-matrix.outputs.os != '[]' && needs.generate-matrix.outputs.os != '' }}
     strategy:
       matrix:
         python-version: ["3.10"]
