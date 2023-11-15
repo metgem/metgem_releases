@@ -30,7 +30,8 @@ jobs:
   build-release:
     name: Build
     needs: [generate-matrix]
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.os }}
+    if: ${{ needs.generate-matrix.outputs.os != '[]' && needs.generate-matrix.outputs.os != '' }}
     strategy:
       matrix:
         python-version: ["3.10"]
@@ -106,28 +107,32 @@ jobs:
 
   generate-matrix:
     runs-on: ubuntu-latest
-    name: "Generate matrix job specs"
+    name: Generate matrix job specs
     outputs:
-      os: ${{ steps.generate-matrix.outputs.os }}
+      os: ${{ steps.generate-matrix.outputs.result }}
     steps:
       - name: generate-matrix
         id: generate-matrix
-        run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            os=()
-            if [ "${{ github.event.inputs.linux}}" == "true" ]; then
-              os+=('ubuntu')
-            fi
-            if [ "${{ github.event.inputs.windows}}" == "true" ]; then
-              os+=('windows')
-            fi
-            if [ "${{ github.event.inputs.macos }}" == "true" ]; then
-              os+=('macos')
-            fi
-            os=$(printf ', "%s"' "${os[@]}")
-            os="[${os:2}]"
-            echo "[INFO] OS selected: $os"
-            echo "os=$os" >> $GITHUB_OUTPUT
-          else
-            echo 'os=["ubuntu","windows","macos"]' >> $GITHUB_OUTPUT
-          fi
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const all_oses = {"linux": "ubuntu-latest",
+                              "windows": "windows-latest",
+                              "macos": "macos-latest"};
+            const inputs = context.payload.inputs;
+            
+            if ("${{ github.event_name }}" == "workflow_dispatch") {
+              let oses = {...all_oses};
+              for (let key in inputs) {
+                if (inputs[key] != "true") {
+                  delete oses[key];
+                }
+              }
+              
+              console.log("[INFO] OS selected:", Object.keys(oses));
+              return Object.values(oses);
+            }
+            else {
+              return Object.values(all_oses);
+            }

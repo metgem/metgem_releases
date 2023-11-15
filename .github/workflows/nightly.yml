@@ -31,7 +31,8 @@ jobs:
   build-nightly:
     name: Build
     needs: generate-matrix
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.os }}
+    if: ${{ needs.generate-matrix.outputs.os != '[]' && needs.generate-matrix.outputs.os != '' }}
     strategy:
       matrix:
         python-version: ["3.10"]
@@ -140,8 +141,9 @@ jobs:
   # Check that current commit does not have a nightly build asset uploaded yet
   generate-matrix:
     runs-on: ubuntu-latest
+    name: Generate matrix job specs
     outputs:
-      os: ${{ steps.assets.outputs.result }}
+      os: ${{ steps.generate-matrix.outputs.result }}
     steps:
       - name: Get release SHA
         id: sha
@@ -149,8 +151,8 @@ jobs:
           sha=`git ls-remote https://github.com/metgem/metgem HEAD | head -1 | cut -f 1 | cut -c1-6`
           echo "MetGem SHA is $sha"
           echo "sha=$sha" >> $GITHUB_OUTPUT
-      - name: Check existing assets
-        id: assets
+      - name: Check existing assets and generate-matrix
+        id: generate-matrix
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.RELEASE_TOKEN }}
@@ -159,11 +161,13 @@ jobs:
               const repo = 'metgem';
               const sha = '${{ steps.sha.outputs.sha }}';
               const release_id = '33563969';
-              const all_oses = ["ubuntu","windows","macos"];
+              const all_oses = {"linux": "ubuntu-latest",
+                                "windows": "windows-latest",
+                                "macos": "macos-latest"};
               
               if ("${{ github.event_name }}" == "repository_dispatch" || "${{ github.event_name }}" == "workflow_dispatch") {
                 console.log("[WARNING] Nightly workflow triggered manually");
-                return all_oses;
+                return Object.values(all_oses);
               }
               
               const assets = await github.rest.repos.listReleaseAssets({
@@ -172,25 +176,25 @@ jobs:
                   release_id: release_id
               });
             
-              let oses = new Set(all_oses);
+              let oses = {...all_oses};
               for (const asset of assets['data']) {
                 asset_name = asset['name'];
                 asset_sha = asset_name.substring(asset_name.lastIndexOf('-')+1, asset_name.lastIndexOf('.')) || ""
                 
                 if (asset_sha == sha) {
                   if (asset_name.endsWith('.AppImage')) {
-                    oses.delete("ubuntu");
+                    delete oses.linux;
                     console.log("[WARNING] Commit already built on Linux, skipping build");
                   }
                   else if (asset_name.endsWith('.dmg')) {
-                    oses.delete("macos")
+                    delete oses.macos;
                     console.log("[WARNING] Commit already built on macOS, skipping build");
                   }
                   else if (asset_name.endsWith('.exe')) {
-                    oses.delete("windows")
+                    delete oses.windows;
                     console.log("[WARNING] Commit already built on Windows, skipping build");
                   }
                 }
               }
             
-              return Array.from(oses);
+              return Object.values(oses);
