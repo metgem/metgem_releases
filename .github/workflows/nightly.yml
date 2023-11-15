@@ -74,10 +74,11 @@ jobs:
         with:
           path: ${{ steps.get-prefix.outputs.prefix }}
           key: ${{ runner.os }}-${{matrix.python-version}}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('metgem/environment*.yml') }}
+          fail-on-cache-miss: true
       - name: Set up Environment
         uses: ./.github/actions/set_up_env
         with:
-          use-cached: ${{ steps.cache.outputs.cache-hit }}
+          use-cached: true
       - name: Build
         id: build
         uses: ./.github/actions/build
