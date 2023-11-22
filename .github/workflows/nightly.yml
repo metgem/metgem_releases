@@ -73,7 +73,7 @@ jobs:
           CACHE_NUMBER: 0
         with:
           path: ${{ steps.get-prefix.outputs.prefix }}
-          key: ${{ runner.os }}-${{matrix.python-version}}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('metgem/environment*.yml') }}
+          key: ${{ runner.os }}-${{matrix.python-version}}-conda-${{ env.CACHE_NUMBER }} }}
           fail-on-cache-miss: true
       - name: Set up Environment
         uses: ./.github/actions/set_up_env
