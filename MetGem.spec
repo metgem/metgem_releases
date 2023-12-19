@@ -330,5 +330,5 @@ if sys.platform.startswith('darwin') and not DEBUG:
     app = BUNDLE(coll,
                  name='MetGem.app',
                  icon=icon,
-                 bundle_identifier=None,
+                 bundle_identifier='MetGem',
                  version=version)
