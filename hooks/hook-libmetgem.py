@@ -1,4 +1,4 @@
-hiddenimports = ['libmetgem.common', 'libmetgem._common',
-                 'libmetgem._cosine', 'libmetgem._database',
-                 'libmetgem._filter', 'libmetgem._mgf', 'libmetgem._msp',
-                 'libmetgem._network']
+from PyInstaller.utils.hooks import collect_submodules, collect_data_files, collect_dynamic_libs
+
+hiddenimports = collect_submodules('libmetgem', filter=lambda x: "tests" not in x)
+
