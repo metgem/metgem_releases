@@ -168,12 +168,26 @@ def installer(ctx, validate_appstream=True):
                            'icon': icon,
                            'icon-size': 150,
                            'background': os.path.join(PACKAGING_DIR, 'installer_background.png'),
-                           'window': {'size': {'width': 800, 'height': 400}},
-                           'contents': [{'x': 525, 'y': 125, 'type': 'link', 'path': '/Applications'},
-                                        {'x': 125, 'y': 125, 'type': 'file', 'path': source_folder}]}
+                           'window': {
+                               'size': {
+                                   'width': 640,
+                                   'height': 480
+                                }
+                           },
+                           'contents': [
+                               {'x': 526,
+                                'y': 245,
+                                'type': 'link',
+                                'path': '/Applications'},
+                               {'x': 136,
+                                'y': 245,
+                                'type': 'file',
+                                'path': source_folder}
+                           ]
+                        }
             appdmg_json_fn = os.path.join(PACKAGING_DIR, 'appdmg.json')
             with open(appdmg_json_fn, 'w') as f:
-                json.dump(appdmg_json, f)
+                json.dump(appdmg_json, f, indent=4)
 
             subprocess.run(['appdmg', appdmg_json_fn, output])
     elif sys.platform.startswith('linux'):
