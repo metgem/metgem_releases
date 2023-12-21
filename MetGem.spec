@@ -298,7 +298,12 @@ kwargs = dict(exclude_binaries=True,
               strip=False,
               upx=True,
               version=version_file,
-              icon=icon)
+              icon=icon,
+              disable_windowed_traceback=False,
+              argv_emulation=False,
+              target_arch=None,
+              codesign_identity=None,
+              entitlements_file=None)
 # noinspection PyUnresolvedReferences
 gui_exe = EXE(gui_pyz,
           gui_a.scripts,
@@ -326,9 +331,14 @@ coll = COLLECT(gui_exe,
 
 
 if sys.platform.startswith('darwin') and not DEBUG:
+    info_plist = {
+        "LSBackgroundOnly": False,
+        "NSHighResolutionCapable": True,
+    }
     # noinspection PyUnresolvedReferences
     app = BUNDLE(coll,
                  name='MetGem.app',
                  icon=icon,
-                 bundle_identifier='MetGem',
-                 version=version)
+                 bundle_identifier='fr.cnrs.metgem',
+                 version=version,
+                 info_plist=info_plist)
