@@ -331,6 +331,10 @@ coll = COLLECT(gui_exe,
 
 
 if sys.platform.startswith('darwin') and not DEBUG:
+    # Force LSBackgroundOnly property to false
+    # If set to true, menubar is hidden and spinboxes are locked
+    # This property is is set to true by PyInstaller when `console=True` parameter is passed to EXE
+    # As MetGem creates two EXE, and the last one is a console app, this could explain why LSBackgroundOnly is true by default
     info_plist = {
         "LSBackgroundOnly": False,
         "NSHighResolutionCapable": True,

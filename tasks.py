@@ -164,6 +164,7 @@ def installer(ctx, validate_appstream=True):
             shutil.copytree(os.path.join(PACKAGING_DIR, 'metgem', 'examples'),
                             os.path.join(source_folder, 'examples'))
 
+            # Warning, make sure that installer background image has a 72 dpi resolution
             appdmg_json = {'title': NAME,
                            'icon': icon,
                            'icon-size': 150,
