@@ -44,7 +44,7 @@ jobs:
           git submodule init
           git submodule update
       - name: Set up Python
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           miniforge-variant: Mambaforge
           miniforge-version: latest
@@ -62,7 +62,7 @@ jobs:
       - name: Cache conda
         if: ${{ !env.ACT }}
         id: cache
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         env:
           # Increase this value to reset cache if environment.yml has not changed
           CACHE_NUMBER: 0
@@ -87,9 +87,9 @@ jobs:
         uses: ./.github/actions/tests
       - name: Upload Tests Artifacts
         if: ${{ !env.ACT && (success() || (failure() && steps.tests.conclusion == 'failure' )) }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: tests
+          name: tests-${{ matrix.runs-on }}
           path: ${{ steps.tests.outputs.log }}
       - name: Release
         if: ${{ !env.ACT }}
