@@ -38,7 +38,7 @@ jobs:
         os: ${{ fromJSON(needs.generate-matrix.outputs.os) }}
       fail-fast: false
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Update submodules
         run: |
           git submodule init
@@ -114,7 +114,7 @@ jobs:
     steps:
       - name: generate-matrix
         id: generate-matrix
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

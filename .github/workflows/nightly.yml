@@ -39,7 +39,7 @@ jobs:
         os: ${{ fromJSON(needs.generate-matrix.outputs.os) }}
       fail-fast: false
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Update submodules
         run: |
           git submodule init
@@ -111,7 +111,7 @@ jobs:
           sha: ${{ steps.build.outputs.sha }}
       - name: Update Nightly tag
         if: ${{ !env.ACT }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.RELEASE_TOKEN }}
           script: |
@@ -154,7 +154,7 @@ jobs:
           echo "sha=$sha" >> $GITHUB_OUTPUT
       - name: Check existing assets and generate-matrix
         id: generate-matrix
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.RELEASE_TOKEN }}
           script: |
