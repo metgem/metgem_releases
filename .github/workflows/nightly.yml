@@ -139,6 +139,17 @@ jobs:
               console.log('Created new tag nightly as', sha);
             }
 
+  merge:
+    runs-on: ubuntu-latest
+    needs: build-nightly
+    steps:
+      - name: Merge Artifacts
+        uses: actions/upload-artifact/merge@v4
+        with:
+          name: tests
+          pattern: tests-*
+          delete-merged: true
+
   # Check that current commit does not have a nightly build asset uploaded yet
   generate-matrix:
     runs-on: ubuntu-latest
