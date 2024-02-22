@@ -78,6 +78,11 @@ jobs:
         uses: ./.github/actions/set_up_env
         with:
           use-cached: true
+      - name: Run Tests (Source)
+        id: tests-source
+        uses: ./.github/actions/tests
+        with:
+          packaged: false
       - name: Build
         id: build
         uses: ./.github/actions/build
@@ -86,9 +91,11 @@ jobs:
           certificate: ${{ secrets.APPLE_CERTIFICATE }}
           certificate_pwd: ${{ secrets.APPLE_CERTIFICATE_PWD }}
           identity_id: ${{ secrets.APPLE_IDENTITY_ID }}
-      - name: Run Tests
+      - name: Run Tests (Packaged)
         id: tests
         uses: ./.github/actions/tests
+        with:
+          packaged: true
       - name: Upload Tests Artifacts
         if: ${{ !env.ACT && (success() || (failure() && steps.tests.conclusion == 'failure' )) }}
         uses: actions/upload-artifact@v4

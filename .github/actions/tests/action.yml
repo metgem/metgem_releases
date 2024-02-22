@@ -1,5 +1,10 @@
 name: 'Run tests'
 description: 'Run tests and output log file'
+inputs:
+  packaged:
+    description: "If true, test the packaged binary, otherwise test the source script"
+    required: false
+    default: 'true'
 outputs:
   log:
     description: "Name of tests log file"
@@ -12,6 +17,12 @@ runs:
       shell: bash -l {0}
       run: |
         sha=`git rev-parse --short HEAD:metgem`
-        log=tests-${{ runner.os }}-$sha.log
-        echo "log=$log" >> $GITHUB_OUTPUT
-        dist/MetGem/MetGem --pytest 1>$log 2>&1
+        if [ "${{ inputs.packaged }}" == "true" ]; then
+          log=tests-${{ runner.os }}-packaged-$sha.log
+          echo "log=$log" >> $GITHUB_OUTPUT
+          dist/MetGem/MetGem --pytest 1>$log 2>&1
+        else
+          log=tests-${{ runner.os }}-source-$sha.log
+          echo "log=$log" >> $GITHUB_OUTPUT
+          pytest 1>$log 2>&1
+        fi
