@@ -78,6 +78,10 @@ jobs:
         uses: ./.github/actions/set_up_env
         with:
           use-cached: true
+      - name: Install libegl
+        if: runner.os == 'Linux'
+        run:
+          sudo apt install libegl1 -y
       - name: Run Tests (Source)
         id: tests-source
         uses: ./.github/actions/tests
