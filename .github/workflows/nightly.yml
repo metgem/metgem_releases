@@ -83,6 +83,12 @@ jobs:
         uses: ./.github/actions/tests
         with:
           packaged: false
+      - name: Upload Tests Artifacts
+        if: ${{ !env.ACT && (success() || (failure() && steps.tests-source.conclusion == 'failure' )) }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-source-${{ matrix.os }}
+          path: ${{ steps.tests-source.outputs.log }}
       - name: Build
         id: build
         uses: ./.github/actions/build
@@ -100,7 +106,7 @@ jobs:
         if: ${{ !env.ACT && (success() || (failure() && steps.tests.conclusion == 'failure' )) }}
         uses: actions/upload-artifact@v4
         with:
-          name: tests-${{ matrix.os }}
+          name: tests-packaged-${{ matrix.os }}
           path: ${{ steps.tests.outputs.log }}
       - name: Deploy Nightly
         if: ${{ !env.ACT }}
