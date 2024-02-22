@@ -76,6 +76,13 @@ jobs:
       - name: Update environment
         if: ${{ inputs.use-cached }} == "true"
         run: mamba update -n metgem --all
+      - name: List packages
+        run: mamba list >"packages-${{ runner.os }}.txt"
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages-${{ matrix.os }}
+          path: packages-*.txt
 
   generate-matrix:
     runs-on: ubuntu-latest
