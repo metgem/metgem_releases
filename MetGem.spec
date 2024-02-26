@@ -31,6 +31,21 @@ def clean_datas(a: Analysis):
     return a
 
 
+def clean_system_libraries(a: Analysis):
+    '''On anaconda, some libraries packaged in virtual environment are taken
+    from system instead of environment. Make sure to use virtual environment files'''
+    
+    bins = {}
+    for name, path, typ in a.binaries:
+        if path.startswith('/lib') or path.startswith('/usr/lib'):
+            venv_path = os.path.join(sys.prefix, 'lib', name)
+            if os.path.exists(venv_path):
+                bins[name] = (name, venv_path, typ)
+    a.binaries = [(name, path, typ) for name, path, typ in a.binaries if name not in bins.keys()]
+    a.binaries.extend(bins.values())
+    
+    return a
+
 # https://github.com/pyinstaller/pyinstaller/wiki/Recipe-Setuptools-Entry-Point
 # noinspection PyUnresolvedReferences
 def Entrypoint(dist, group, name, **kwargs):
@@ -219,7 +234,9 @@ cli_a = Entrypoint('metgem', 'console_scripts', 'metgem-cli',
                    )
 
 gui_a = clean_datas(gui_a)
+gui_a = clean_system_libraries(gui_a)
 cli_a = clean_datas(cli_a)
+cli_a = clean_system_libraries(cli_a)
 
 # noinspection PyUnresolvedReferences
 gui_pyz = PYZ(gui_a.pure, gui_a.zipped_data, cipher=block_cipher)
