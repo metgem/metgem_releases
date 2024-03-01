@@ -77,12 +77,17 @@ jobs:
         uses: ./.github/actions/set_up_env
         with:
           use-cached: ${{ steps.cache.outputs.cache-hit == 'true' }}
+      - name: Upload Packages artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages-${{ matrix.os }}
+          path: packages-*.txt
       - name: Run Tests (Source)
         id: tests-source
         uses: ./.github/actions/tests
         with:
           packaged: false
-      - name: Upload Tests Artifacts
+      - name: Upload Tests Artifacts (Source)
         if: ${{ !env.ACT && (success() || (failure() && steps.tests-source.conclusion == 'failure' )) }}
         uses: actions/upload-artifact@v4
         with:
@@ -101,7 +106,7 @@ jobs:
         uses: ./.github/actions/tests
         with:
           packaged: true
-      - name: Upload Tests Artifacts
+      - name: Upload Tests Artifacts (Packaged)
         if: ${{ !env.ACT && (success() || (failure() && steps.tests.conclusion == 'failure' )) }}
         uses: actions/upload-artifact@v4
         with:
@@ -154,11 +159,17 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-nightly
     steps:
-      - name: Merge Artifacts
+      - name: Merge Tests Artifacts
         uses: actions/upload-artifact/merge@v4
         with:
           name: tests
           pattern: tests-*
+          delete-merged: true
+      - name: Merge Packages Artifacts
+        uses: actions/upload-artifact/merge@v4
+        with:
+          name: packages
+          pattern: packages-*
           delete-merged: true
 
   # Check that current commit does not have a nightly build asset uploaded yet

@@ -74,6 +74,11 @@ jobs:
           use-cached: ${{ steps.cache.outputs.cache-hit == 'true' }}
           install-system-deps: false
           update: true
+      - name: Upload Packages artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages-${{ matrix.os }}
+          path: packages-*.txt
 
   generate-matrix:
     runs-on: ubuntu-latest
