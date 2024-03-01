@@ -43,11 +43,14 @@ runs:
         conda config --show-sources
         conda config --show
     - name: Update environment
+      shell: bash -l {0}
       if: ${{ inputs.update == 'true' }}
       run: mamba update -n metgem --all
     - name: List packages
+      shell: bash -l {0}
       run: mamba list >"packages-${{ runner.os }}.txt"
     - name: Upload artifacts
+      shell: bash -l {0}
       uses: actions/upload-artifact@v4
       with:
         name: packages-${{ matrix.os }}
