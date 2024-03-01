@@ -9,6 +9,10 @@ inputs:
     description: "Install system dependencies"
     required: false
     default: 'true'
+  update:
+    description: "Update environment"
+    required: false
+    default: 'true'
 runs:
   using: "composite"
   steps:
@@ -27,7 +31,7 @@ runs:
       shell: bash -l {0}
       run: |
         if [ "${{ runner.os }}" == "Linux" ]; then
-          sudo apt-get install -y libfuse2
+          sudo apt-get install -y libfuse2 libegl1 libopengl0 
         elif [ "${{ runner.os }}" == "macOS" ]; then
           npm install -g appdmg
         fi
@@ -38,3 +42,13 @@ runs:
         conda list
         conda config --show-sources
         conda config --show
+    - name: Update environment
+      if: ${{ inputs.update == 'true' }}
+      run: mamba update -n metgem --all
+    - name: List packages
+      run: mamba list >"packages-${{ runner.os }}.txt"
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: packages-${{ matrix.os }}
+        path: packages-*.txt

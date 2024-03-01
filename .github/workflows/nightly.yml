@@ -66,22 +66,17 @@ jobs:
       - name: Cache conda
         if: ${{ !env.ACT }}
         id: cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache@v4
         env:
           # Increase this value to reset cache if environment.yml has not changed
           CACHE_NUMBER: 0
         with:
           path: ${{ steps.get-prefix.outputs.prefix }}
           key: ${{ runner.os }}-${{matrix.python-version}}-conda-${{ env.CACHE_NUMBER }}
-          fail-on-cache-miss: true
       - name: Set up Environment
         uses: ./.github/actions/set_up_env
         with:
-          use-cached: true
-      - name: Install libegl and libopengl
-        if: runner.os == 'Linux'
-        run:
-          sudo apt install libegl1 libopengl0 -y
+          use-cached: ${{ steps.cache.outputs.cache-hit == 'true' }}
       - name: Run Tests (Source)
         id: tests-source
         uses: ./.github/actions/tests
