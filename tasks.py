@@ -70,6 +70,11 @@ def exe(ctx, clean=False, debug=False, build_py=True):
     result = ctx.run(f"pyinstaller {os.path.join(PACKAGING_DIR, 'MetGem.spec')} --noconfirm {' '.join(switchs)} --distpath {DIST} --workpath {BUILD}")
 
     if result:
+        # Add examples data files (this is handled by installer on macOS)
+        if not sys.platform.startswith('darwin'):
+            shutil.copytree(os.path.join(PACKAGING_DIR, 'metgem', 'examples'),
+                            os.path.join(DIST, coll_name, 'examples'))
+
         if sys.platform.startswith('win'):
             embed_manifest(ctx, debug)
             if not debug:
