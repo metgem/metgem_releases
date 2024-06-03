@@ -35,7 +35,7 @@ jobs:
     if: ${{ needs.generate-matrix.outputs.os != '[]' && needs.generate-matrix.outputs.os != '' }}
     strategy:
       matrix:
-        python-version: ["3.10"]
+        python-version: ["3.11"]
         os: ${{ fromJSON(needs.generate-matrix.outputs.os) }}
       fail-fast: false
     steps:
