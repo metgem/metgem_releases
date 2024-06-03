@@ -45,7 +45,7 @@ runs:
     - name: Update environment
       shell: bash -l {0}
       if: ${{ inputs.update == 'true' }}
-      run: mamba update -n metgem --all
+      run: mamba env update -n metgem -f metgem/environment.yml
     - name: List packages
       shell: bash -l {0}
       run: mamba list >"packages-${{ runner.os }}.txt"
