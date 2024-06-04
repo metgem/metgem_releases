@@ -87,7 +87,7 @@ begin
       RegQueryStringValue(HKEY_LOCAL_MACHINE,
         'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{#AppID}_is1',
         'DisplayVersion', oldVersion);
-      if (CompareVersion(oldVersion, '{#AppVersion}') < 0) then
+      if (CompareVersion(oldVersion, '{#AppVersion}') <= 0) then
       begin
         if MsgBox(FmtMessage(CustomMessage('UninstallOldVersion'), [oldVersion]), mbConfirmation, MB_YESNO) = IDYES then
         begin
