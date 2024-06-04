@@ -97,7 +97,7 @@ jobs:
         with:
           prerelease: true
           allowUpdates: true
-          updateOnlyUnreleased: true
+          updateOnlyUnreleased: false
           repo: metgem
           owner: metgem
           tag: ${{ steps.build.outputs.tag }}
