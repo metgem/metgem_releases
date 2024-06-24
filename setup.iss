@@ -9,7 +9,7 @@
 #define AppExeName "MetGem.exe"
 
 #include "isportable.iss"
-#include "isversion.iss"
+//#include "isversion.iss"
 
 [Setup]
 AppId={{#AppId}
@@ -20,7 +20,7 @@ AppPublisher={#AppPublisher}
 AppPublisherURL={#AppURL}
 AppSupportURL={#AppURL}
 AppUpdatesURL={#AppURL}
-DefaultDirName={code:GetDefaultDirName|{#AppName}}
+DefaultDirName={code:DefaultInstallDirectory}\{#AppName}
 DefaultGroupName={#AppName}
 AllowNoIcons=yes
 OutputBaseFilename=setup_{#AppName}
@@ -30,14 +30,14 @@ SetupIconFile=main.ico
 WizardImageFile=wiz-image.bmp
 WizardSmallImageFile=wiz-small-image.bmp
 WizardImageAlphaFormat=defined
-ArchitecturesInstallIn64BitMode=x64
-ArchitecturesAllowed=x64
+ArchitecturesAllowed=x64compatible
+ArchitecturesInstallIn64BitMode=x64compatible
 ChangesAssociations=True
 LicenseFile=LICENSE
 Compression=lzma2/fast
 WizardStyle=modern
 Uninstallable=not IsPortable
-CreateUninstallRegKey=not IsPortable
+CreateUninstallRegKey=yes
 DisableDirPage=no
 
 [Languages]
@@ -45,7 +45,10 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "french"; MessagesFile: "compiler:Languages\French.isl"
 
 [Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; Check: not IsPortable
+Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 6.1; Check: not IsPortable
+Name: "iconscurrentuser"; Description: "{cm:IconsCurrentUser}"; GroupDescription: "{cm:CreateIconsFor}"; Flags: exclusive; Check: not IsRegularUser and not IsPortable
+Name: "iconscommon"; Description: "{cm:IconsAllUsers}"; GroupDescription: "{cm:CreateIconsFor}"; Flags: exclusive unchecked; Check: not IsRegularUser and not IsPortable
 
 [Dirs]
 Name: "{app}\data"; Check: IsPortable

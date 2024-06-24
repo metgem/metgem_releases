@@ -1,83 +1,88 @@
 // -- IsPortable.iss --
-// Include file with support functions for portable mode
+// Add a page to install app in portable mode
 //
 
-[Messages]
-HelpTextNote=/PORTABLE=1%nEnable portable mode.
+[CustomMessages]
+english.CreateIconsFor=Create start menu and desktop icons for:
+english.IconsCurrentUser=The current user only
+english.IconsAllUsers=All users
+english.PortablePageTitle=How should {#AppName} be installed?
+english.InstallationMode={#AppName} can run as an installed application or in portable mode. Please select your preferred mode
+english.InstallationType=Installation Type
+english.InstallationModeNormal=Normal
+english.InstallationModePortable=Portable
+french.CreateIconsFor=Créer les icônes du menu démarrer et sur le bureau pour :
+french.IconsCurrentUser=L'utilisateur courant uniquement
+french.IconsAllUsers=Tous les utilisateurs
+french.PortablePageTitle=Comment {#AppName} doit être installé ?
+french.InstallationMode={#AppName} peut s'exécuter en tant qu'application installée ou en mode portable. Veuillez sélectionner le mode que vous préférez.
+french.InstallationType=Type d'installation
+french.InstallationModeNormal=Normal
+french.InstallationModePortable=Portable
 
 [Code]
-function CreateFile(
-    lpFileName             : String;
-    dwDesiredAccess        : Cardinal;
-    dwShareMode            : Cardinal;
-    lpSecurityAttributes   : Cardinal;
-    dwCreationDisposition  : Cardinal;
-    dwFlagsAndAttributes   : Cardinal;
-    hTemplateFile          : Integer
-): THandle;
-external 'CreateFileW@kernel32.dll stdcall';
+var
+  PortablePage: TInputOptionWizardPage;
 
-function CloseHandle(hHandle: THandle): BOOL;
-external 'CloseHandle@kernel32.dll stdcall';
-
-const
-  { Win32 constants }
-  GENERIC_READ         = $80000000;
-  GENERIC_WRITE        = $40000000;
-  OPEN_EXISTING        = 3;
-  INVALID_HANDLE_VALUE = -1;
-  CREATE_NEW           = 1;
-  //FILE_ATTRIBUTE_TEMPORARY = $100;
-  FILE_FLAG_DELETE_ON_CLOSE = $4000000;
-
-function IsDirectoryWriteable(const AName: string): Boolean; 
-var 
-  FileName: String; 
-  H: THandle; 
-begin 
-  FileName := AddBackslash(AName) + 'chk.tmp'; 
-  H := CreateFile(FileName, GENERIC_READ or GENERIC_WRITE, 0, 0, 
-    CREATE_NEW, FILE_ATTRIBUTE_TEMPORARY or FILE_FLAG_DELETE_ON_CLOSE, 0); 
-  Result := H <> INVALID_HANDLE_VALUE; 
-  if Result then CloseHandle(H);
+function IsRegularUser(): Boolean;
+begin
+  Result := not (IsAdminInstallMode or IsPowerUserLoggedOn);
 end;
 
-function IsPortable: Boolean;
+function IsPortable(): Boolean;
 begin
-  Result := ExpandConstant('{param:portable|0}') = '1';
-end;
-
-function GetDefaultDirName(Param: String): String;
-begin
-  if IsPortable then
-  begin
-    if IsDirectoryWriteable(ExpandConstant('{src}')) then
-      Result := '{src}'
-    else
-      Result := '{userdesktop}'
-  end
+  if PortablePage = nil then
+    Result := false
   else
-    Result := '{autopf}';
-  Result := ExpandConstant(AddBackslash(Result) + Param);
+    Result := PortablePage.Values[1];
 end;
 
-<event('InitializeWizard')>
-procedure IsPortableInitializeWizard;
+function DefaultInstallDirectory(Param: String): String;
 begin
   if IsPortable then
+    Result := ExpandConstant('{drive:{srcexe}}')
+  else if IsRegularUser then
+    Result := ExpandConstant('{localappdata}')
+  else
+    Result := ExpandConstant('{autopf}');
+  Result := Result + '\{#AppName}';
+end;
+
+function UserOrCommonDirectory(Param: String): String;
+begin
+  if WizardIsTaskSelected('iconscommon') then
+    Result := ExpandConstant('{common' + Param + '}')
+  else
+    Result := ExpandConstant('{user' + Param + '}')
+end;
+
+procedure InitializeWizard;
+begin
+  PortablePage := CreateInputOptionPage(wpLicense,
+    CustomMessage('InstallationType'),
+    CustomMessage('PortablePageTitle'),
+    CustomMessage('InstallationMode'),
+    True, False);
+  PortablePage.Add(CustomMessage('InstallationModeNormal'));
+  PortablePage.Add(CustomMessage('InstallationModePortable'));
+  PortablePage.Values[0] := True;
+end;
+
+function NextButtonClick(CurPageID: Integer): Boolean;
+begin
+  if (CurPageID = PortablePage.ID) then
   begin
-    WizardForm.DirEdit.Text := GetDefaultDirName('{#AppName}');
+    WizardForm.DirEdit.Text := DefaultInstallDirectory('');
+    WizardForm.NoIconsCheck.Checked := IsPortable;
   end;
+  Result := True;
 end;
 
-<event('ShouldSkipPage')>
-function ShouldSkipSelectDirPage(PageID: Integer): Boolean;
+function ShouldSkipPage(PageID: Integer): Boolean;
 begin
-  Result := (PageID = wpSelectDir) and not IsPortable;
-end;
-
-<event('ShouldSkipPage')>
-function ShouldSkipSelectProgramGroupPage(PageID: Integer): Boolean;
-begin
-  Result := (PageID = wpSelectProgramGroup) and IsPortable;
+  if (PageID = wpSelectProgramGroup) and IsPortable then
+  begin
+      WizardForm.NoIconsCheck.Checked := True;
+      Result := True;
+  end;
 end;
