@@ -9,7 +9,7 @@
 #define AppExeName "MetGem.exe"
 
 #include "isportable.iss"
-//#include "isversion.iss"
+#include "isversion.iss"
 
 [Setup]
 AppId={{#AppId}
