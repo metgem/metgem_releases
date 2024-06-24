@@ -150,7 +150,7 @@ def installer(ctx, validate_appstream=True):
     if sys.platform.startswith('win'):
         iscc = shutil.which("ISCC")
         iss = os.path.join(PACKAGING_DIR, 'setup.iss')
-        ctx.run(f"{iscc} {iss}")
+        ctx.run(f"\"{iscc}\" {iss}")
     elif sys.platform.startswith('darwin'):
         output = os.path.join(PACKAGING_DIR, NAME + '.dmg')
         if os.path.exists(output):
