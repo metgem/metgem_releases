@@ -250,7 +250,7 @@ if sys.platform.startswith('win'):
     # Write file_version_info.txt to use it in EXE
     import re
     version_file = None
-    v = re.match("(\d)\.(\d)\.(\d)\w*(\d?)", version)
+    v = re.match(r"(\d)\.(\d)\.(\d)\w*(\d?)", version)
     if v is not None:
         v = ", ".join(a if a else '0' for a in v.groups())
         # noinspection PyUnresolvedReferences
