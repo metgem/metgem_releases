@@ -57,6 +57,7 @@ jobs:
           mamba-version: "*"
           channel-priority: strict
           channels: conda-forge,metgem,bioconda
+          conda-remove-defaults: "true"
           python-version: ${{ matrix.python-version }}
       - name: Get Cache folder
         id: get-prefix
