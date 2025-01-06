@@ -18,7 +18,7 @@ runs:
   steps:
     - name: Set up environment
       if: ${{ inputs.use-cached == 'false' }}
-      shell: bash -l {0}
+      shell: bash -el {0}
       run: |
         mamba env update -n metgem -f metgem/environment.yml
         mamba env update -n metgem -f metgem/environment.dev.yml
@@ -28,7 +28,7 @@ runs:
         fi
     - name: Install system build dependencies
       if: ${{ inputs.install-system-deps == 'true' }}
-      shell: bash -l {0}
+      shell: bash -el {0}
       run: |
         if [ "${{ runner.os }}" == "Linux" ]; then
           sudo apt-get install -y libfuse2 libegl1 libopengl0 
@@ -36,16 +36,16 @@ runs:
           npm install -g appdmg
         fi
     - name: Conda info
-      shell: bash -l {0}
+      shell: bash -el {0}
       run: |
         conda info
         conda list
         conda config --show-sources
         conda config --show
     - name: Update environment
-      shell: bash -l {0}
+      shell: bash -el {0}
       if: ${{ inputs.update == 'true' }}
       run: mamba env update -n metgem -f metgem/environment.yml
     - name: List packages
-      shell: cmd /C CALL {0}
+      shell: bash -el {0}
       run: mamba list >"packages-${{ runner.os }}.txt"
