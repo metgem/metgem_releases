@@ -74,8 +74,6 @@ jobs:
         with:
           path: ${{ steps.get-prefix.outputs.prefix }}
           key: ${{ runner.os }}-${{matrix.python-version}}-conda-${{ env.CACHE_NUMBER }}
-      - name: Get mamba info
-        run: mamba info
       - name: Set up Environment
         uses: ./.github/actions/set_up_env
         with:

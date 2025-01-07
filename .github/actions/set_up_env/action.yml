@@ -16,15 +16,23 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Find mamba command
+      run: |
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          echo "mamba=mamba.bat" >> "$GITHUB_ENV"
+        else
+          echo "mamba=mamba" >>"$GITHUB_ENV"
+        fi
+        echo $mamba
     - name: Set up environment
       if: ${{ inputs.use-cached == 'false' }}
       shell: bash -el {0}
       run: |
-        mamba env update -n metgem -f metgem/environment.yml
-        mamba env update -n metgem -f metgem/environment.dev.yml
-        mamba env update -n metgem -f environment.packaging.yml
+        $mamba env update -n metgem -f metgem/environment.yml
+        $mamba env update -n metgem -f metgem/environment.dev.yml
+        $mamba env update -n metgem -f environment.packaging.yml
         if [ "${{ runner.os }}" == "Windows" ]; then
-            mamba install pywin32
+            $mamba install pywin32
         fi
     - name: Install system build dependencies
       if: ${{ inputs.install-system-deps == 'true' }}
@@ -45,7 +53,7 @@ runs:
     - name: Update environment
       shell: bash -el {0}
       if: ${{ inputs.update == 'true' }}
-      run: mamba env update -n metgem -f metgem/environment.yml
+      run: $mamba env update -n metgem -f metgem/environment.yml
     - name: List packages
       shell: bash -el {0}
-      run: mamba list >"packages-${{ runner.os }}.txt"
+      run: $mamba list >"packages-${{ runner.os }}.txt"
