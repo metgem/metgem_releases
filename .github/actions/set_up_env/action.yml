@@ -17,6 +17,7 @@ runs:
   using: "composite"
   steps:
     - name: Find mamba command
+      shell: bash -el {0}
       run: |
         if [ "${{ runner.os }}" == "Windows" ]; then
           echo "mamba=mamba.bat" >> "$GITHUB_ENV"
