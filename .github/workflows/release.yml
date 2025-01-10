@@ -130,7 +130,7 @@ jobs:
           script: |
             const all_oses = {"linux": "ubuntu-latest",
                               "windows": "windows-latest",
-                              "macos": "macos-12"};
+                              "macos": "macos-13"};
             const inputs = context.payload.inputs;
             
             if ("${{ github.event_name }}" == "workflow_dispatch") {

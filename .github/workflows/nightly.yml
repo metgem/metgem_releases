@@ -198,7 +198,7 @@ jobs:
               const release_id = '33563969';
               const all_oses = {"linux": "ubuntu-latest",
                                 "windows": "windows-latest",
-                                "macos": "macos-12"};
+                                "macos": "macos-13"};
               const exts = {".AppImage": "linux",
                             ".dmg": "macos",
                             ".exe": "windows"};
